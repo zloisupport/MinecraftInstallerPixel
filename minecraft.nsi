@@ -46,6 +46,8 @@ Var Checkbox4_State
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define BTN_MINI_POS "449 14 11 11"
 !define BTN_CLOSE_POS "481 14 11 11"
+!define WINDOW_SIZE ""
+!define CUSTOM_FONT "Minecraft"
 ShowInstDetails nevershow ;Set whether to display the installation details.
 ShowUnInstDetails nevershow ;Set whether to display delete details.
 
@@ -60,9 +62,9 @@ InstallDirRegKey HKLM "${PRODUCT_UNINST_KEY}" "UninstallString"
 ; MUI Predefined constant
 ;!define MUI_ABORTWARNING ;Exit prompt
 ;Path name of the icon
-!define MUI_ICON "Icon\BaiduYun.ico"
+!define MUI_ICON "Icon\MinecraftIcon.ico"
 ;Uninstall the path name of the icon
-!define MUI_UNICON "Icon\BaiduYun.ico"
+!define MUI_UNICON "Icon\MinecraftUninsIcon.ico"
 ;UI use
 !define MUI_UI "UI\mod.exe"
 
@@ -70,7 +72,7 @@ InstallDirRegKey HKLM "${PRODUCT_UNINST_KEY}" "UninstallString"
 ;---------------------------Set software compression type (can also be controlled by external compilation)------------------------------------
 SetCompressor lzma
 SetCompress force
-XPStyle on
+; XPStyle on
 ; ------ MUI Modern interface definition (1.67 Version above is compatible) ------
 !include "MUI2.nsh"
 !include "WinCore.nsh"
@@ -81,7 +83,7 @@ XPStyle on
 !define MUI_CUSTOMFUNCTION_GUIINIT onGUIInit
 
 ;Custom page
- Page custom Page.1
+;  Page custom Page.1
 
 Page custom Page.2 Page.2leave
 ; License agreement page
@@ -115,6 +117,9 @@ UninstPage custom un.Page.7
 !insertmacro MUI_LANGUAGE "English"
 !insertmacro MUI_LANGUAGE "Russian"
 
+
+
+
 ;------------------------------------------------------MUI Modern interface definition and ending function------------------------
 
 Function .onInit
@@ -146,26 +151,29 @@ Function .onInit
     
     File `/ONAME=$PLUGINSDIR\bg.bmp` `images\bdyun.bmp`
     File `/oname=$PLUGINSDIR\mgbg.bmp` `images\Message.bmp`
-    File `/ONAME=$PLUGINSDIR\BeiJing.bmp` `images\BeiJing.bmp`
     File `/oname=$PLUGINSDIR\btn_clos.bmp` `images\clos.bmp`
     File `/oname=$PLUGINSDIR\btn_install.bmp` `images\btn_install.bmp`
     File `/oname=$PLUGINSDIR\btn_mini.bmp` `images\mini.bmp`
     File `/oname=$PLUGINSDIR\btn_dir.bmp` `images\btn_dir.bmp`
-    File `/oname=$PLUGINSDIR\btn_in.bmp` `images\in.bmp`
     File `/oname=$PLUGINSDIR\btn_btn.bmp` `images\btn.bmp`
     File `/oname=$PLUGINSDIR\TanHao.bmp` `images\TanHao.bmp`
     File `/oname=$PLUGINSDIR\TextBox.bmp` `images\TextBox.bmp`
+    File `/oname=$PLUGINSDIR\minecraft_font.ttf` `minecraft_font.ttf`
 
 		;Progress strip skin
 	  File `/oname=$PLUGINSDIR\Progress.bmp` `images\Progress.bmp`
   	File `/oname=$PLUGINSDIR\ProgressBar.bmp` `images\ProgressBar.bmp`
 
     SkinBtn::Init "$PLUGINSDIR\btn_btn.bmp"
-    SkinBtn::Init "$PLUGINSDIR\btn_in.bmp"
     SkinBtn::Init "$PLUGINSDIR\btn_mini.bmp"
 		SkinBtn::Init "$PLUGINSDIR\btn_clos.bmp"
 		SkinBtn::Init "$PLUGINSDIR\btn_install.bmp"
 FunctionEnd
+
+
+
+
+
 
 Function onGUIInit
 
@@ -207,6 +215,8 @@ FunctionEnd
 Function onGUICallback
   ${If} $MSG = ${WM_LBUTTONDOWN}
     SendMessage $HWNDPARENT ${WM_NCLBUTTONDOWN} ${HTCAPTION} $0
+
+    
   ${EndIf}
 FunctionEnd
 ;Popup dialog movement
@@ -237,7 +247,7 @@ Function Page.1
     ${If} $0 == error
         Abort
     ${EndIf}
-    SetCtlColors $0 5  transparent ;Constant background
+    SetCtlColors $0 ""  transparent ;Constant background
 
     ${NSW_SetWindowSize} $0 530 450 ;530  250      Change the size of the PAGE
 
@@ -245,7 +255,7 @@ Function Page.1
     ${NSD_CreateLabel} 1u 130u 493U 18u "Welcome ${PRODUCT_NAME}Setup Wizard"
     Pop $lbl_zhuye
     SetCtlColors $lbl_zhuye "" transparent ;Constant background
-    CreateFont $1 "Segoe UI" "11" "800"
+    CreateFont $1 "Minecraft" "11" "800"
     SendMessage $lbl_zhuye ${WM_SETFONT} $1 0
     ${NSD_AddStyle} $lbl_zhuye ${ES_CENTER}
 
@@ -323,9 +333,9 @@ Function Page.2
     ${If} $0 == error
         Abort
     ${EndIf}
-    SetCtlColors $0 ""  transparent ;Constant background
+    SetCtlColors $0 "f7f7f7"  transparent ;Constant background
 
-   ${NSW_SetWindowSize} $0 530 450 ;530  250 ;Change the size of the PAGE
+   ${NSW_SetWindowSize} $0 530 250 ;530  250 ;Change the size of the PAGE
 
     ;Install button
     ${NSD_CreateButton} 352 192 162 40 "Install"
@@ -335,23 +345,21 @@ Function Page.2
     SkinBtn::onClick $0 $3
 
 		;Title text
-    ${NSD_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME} Install"
+    ${NSD_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME} Install  222"
     Pop $lbl_biaoti
-    ;SetCtlColors $lbl_biaoti "" 0xFFFFFF ;blue
-    SetCtlColors $lbl_biaoti "666666"  transparent ;Constant background
-
+    ${NSD_AddStyle} $lbl_biaoti ${ES_CENTER}
 
 		;Path Selection
-    ${NSD_CreateLabel} 36 110u 130 13u "Select component:"
-    Pop $0
-    SetCtlColors $0 ""  transparent ;Constant background
+    ; ${NSD_CreateLabel} 36 110u 130 13u "Select component:"
+    ; Pop $0
+    ; SetCtlColors $0 ""  transparent ;Constant background
 ;    CreateFont $1 "Segoe UI" "11" "800"
 ;    SendMessage $0 ${WM_SETFONT} $1 0
 
 		;Path Selection
-    ${NSD_CreateLabel} 36 90 130u 12u "Installation Directory:"
+    ${NSD_CreateLabel} 19 166 130u 12u "Installation Directory:"
     Pop $0
-    SetCtlColors $0 ""  transparent ;Constant background
+    SetCtlColors $0 0xffffff  transparent ;Constant background
    ; CreateFont $1 "Segoe UI" "11" "800"
    ; SendMessage $3 ${WM_SETFONT} $1 0
 
@@ -371,16 +379,16 @@ Function Page.2
 #------------------------------------------
 #Option 2
 #------------------------------------------
-    ${NSD_CreateCheckbox} 36 150u 12u 12u ""
-    Pop $Checkbox2
-		SetCtlColors $Checkbox2 "" "f4f4f4"
-		${NSD_SetState} $Checkbox3 ${BST_CHECKED}
-		;ShowWindow $Checkbox2 ${SW_HIDE}
+    ; ${NSD_CreateCheckbox} 36 150u 12u 12u ""
+    ; Pop $Checkbox2
+		; SetCtlColors $Checkbox2 "" "f4f4f4"
+		; ${NSD_SetState} $Checkbox3 ${BST_CHECKED}
+		; ;ShowWindow $Checkbox2 ${SW_HIDE}
 		
-		${NSD_CreateLabel} 36u 151u 100u 12u "Optional 2"
-		Pop $Checkbox_State2
-    SetCtlColors $Checkbox_State2 ""  transparent ;Foreground,Constant background
-    ${NSD_OnClick} $Checkbox_State2 onCheckbox2
+		; ${NSD_CreateLabel} 36u 151u 100u 12u "Optional 2"
+		; Pop $Checkbox_State2
+    ; SetCtlColors $Checkbox_State2 ""  transparent ;Foreground,Constant background
+    ; ${NSD_OnClick} $Checkbox_State2 onCheckbox2
     ;ShowWindow $Checkbox_State2 ${SW_HIDE}   ;When you don't use this option, you can hide
 #------------------------------------------
 #Option 3
@@ -441,13 +449,13 @@ Function Page.2
   	${NSD_CreateText} 53 203 281 20 $INSTDIR ${WS_EX_CLIENTEDGE}|${WS_EX_TRANSPARENT}
 		Pop $Txt_Browser
     SetCtlColors $Txt_Browser 0xffffff 0x8b8b8b
-    CreateFont $1 "tahoma" "12" "500"
-    SendMessage $Txt_Browser ${WM_SETFONT} $1 1
+
 		;ShowWindow $Txt_Browser ${SW_HIDE}
 
 
     ${NSD_CreateBitmap} 19 192 330 40 ""
     Pop $BGImage
+    SetCtlColors  $BGImage 0x006321 0x006321
     ${NSD_SetImage} $BGImage $PLUGINSDIR\TextBox.bmp $ImageHandle
 
     ;Sticker background big picture
@@ -461,6 +469,20 @@ Function Page.2
     WndProc::onCallback $BGImage $0 ;Handling borderless form movement
     nsDialogs::Show
     ${NSD_FreeImage} $ImageHandle
+FunctionEnd
+Function .onGUIEnd
+    Push "$PLUGINSDIR\minecraft_font.ttf"
+    System::Call 'Gdi32::RemoveFontResourceEx(t"$PLUGINSDIR\minecraft_font.ttf",i 0x30,i0)'
+    System::Call "Gdi32::RemoveFontResource(t s) i .s"
+    SendMessage ${HWND_BROADcast} ${WM_FONTCHANGE} 0 0
+
+    Delete "$PLUGINSDIR\minecraft_font.ttf"
+
+    ;     SetCtlColors $Txt_Browser 0xffffff 0x8b8b8b
+    ; Push "$PLUGINSDIR\minecraft_font.ttf"
+    ; System::Call 'GDI32::AddFontResourceEx(t"$PLUGINSDIR\minecraft_font.ttf",i 0x30,i0)'
+    ; System::Call "Gdi32::AddFontResource(t s) i .s"
+    ; CreateFont $1 "$PLUGINSDIR\minecraft_font.ttf" "10" "0"
 FunctionEnd
 
 #----------------------------------------------
@@ -507,7 +529,7 @@ Function  InstFilesPageShow
 
 
     StrCpy $R0 $R2 ;Change the page size,Otherwise, the map can not be full
-    System::Call "user32::MoveWindow(i R0, i 0, i 0, i 498, i 373) i r2"
+    System::Call "user32::MoveWindow(i R0, i 0, i 0, i 530, i 250) i r2"
     GetFunctionAddress $0 onGUICallback
     WndProc::onCallback $R0 $0 ;Handling borderless form movement
     
@@ -515,15 +537,16 @@ Function  InstFilesPageShow
     ;SetCtlColors $R1 "F6F6F6"  F6F6F6 Background is set to F6F6F6, pay attention to the color cannot be transparent, otherwise overlapping
     System::Call "user32::MoveWindow(i R1, i 30, i 82, i 440, i 12) i r2"
 
+
     GetDlgItem $R3 $R2 1990  ;Get 1006 controls set color and change position
-    System::Call "user32::MoveWindow(i R3, i 434, i 1, i 31, i 18) i r2"
+    System::Call "user32::MoveWindow(i R3, i 449, i 14, i 11, i 11) i r2"
 		SkinBtn::Set /IMGID=$PLUGINSDIR\btn_mini.bmp $R3
 		GetFunctionAddress $3 onClickmini
     SkinBtn::onClick $R3 $3
     ;SetCtlColors $R1 ""  F6F6F6 ;Background is set to F6F6F6, pay attention to the color can not be set to transparent, otherwise overlapping
 
     GetDlgItem $R4 $R2 1991  ;Get 1006 controls set color and change position
-    System::Call "user32::MoveWindow(i R4, i 465, i 1, i 31, i 18) i r2" ;改变位置465, 1, 31, 18
+    System::Call "user32::MoveWindow(i R4, i 481, i 14, i 11, i 11) i r2" ;改变位置465, 1, 31, 18
 		SkinBtn::Set /IMGID=$PLUGINSDIR\btn_clos.bmp $R4
 		GetFunctionAddress $3 onClickclos
     SkinBtn::onClick $R4 $3
@@ -549,8 +572,8 @@ Function  InstFilesPageShow
     
     FindWindow $R2 "#32770" "" $HWNDPARENT
     GetDlgItem $R0 $R2 1995
-    System::Call "user32::MoveWindow(i R0, i 0, i 0, i 498, i 373) i r2"
-    ${NSD_SetImage} $R0 $PLUGINSDIR\beijing.bmp $ImageHandle
+    System::Call "user32::MoveWindow(i R0, i 0, i 0, i 530, i 250) i r2"
+    ${NSD_SetImage} $R0 $PLUGINSDIR\bg.bmp $ImageHandle
 
 		;Here is the progress bar map
     FindWindow $R2 "#32770" "" $HWNDPARENT
@@ -575,30 +598,33 @@ Function Page.3
     ${EndIf}
     SetCtlColors $0 ""  transparent ;Constant background
 
-    ${NSW_SetWindowSize} $0 498 373 ;Change the size of the PAGE
+    ${NSW_SetWindowSize} $0 530 250 ;Change the size of the PAGE
 
 
     ${NSD_CreateLabel} 10% 25% 250u 15u '"${PRODUCT_NAME}"The installation is complete！'
     Pop $2
-    SetCtlColors $2 ""  transparent ;Constant background
-    CreateFont $1 "Segoe UI" "11" "700"
+
     SendMessage $2 ${WM_SETFONT} $1 0
 
     ${NSD_CreateLabel} 10% 31% 250u 12u "${PRODUCT_NAME}Installed into your computer, please click [Complete]。"
     Pop $2
+
+    SendMessage $2 ${WM_SETFONT} "$1" 0
     SetCtlColors $2 666666  transparent ;Constant background
 
 		;Title text
     ${NSD_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME} Install"
     Pop $lbl_biaoti
+
     ;SetCtlColors $lbl_biaoti "" 0xFFFFFF ;blue
     SetCtlColors $lbl_biaoti "666666"  transparent ;Constant background
-
+  
 
     ;Complete button
-    ${NSD_CreateButton} 416 339 72 24 "Finish"
+    ${NSD_CreateButton} 352 192 162 40 "Finish"
     Pop $0
-    SkinBtn::Set /IMGID=$PLUGINSDIR\btn_BTN.bmp $0
+    SkinBtn::Set /IMGID=$PLUGINSDIR\btn_install.bmp $0
+
     GetFunctionAddress $3 onClickend
     SkinBtn::onClick $0 $3
 
@@ -620,7 +646,7 @@ Function Page.3
     ;Sticker background big picture
     ${NSD_CreateBitmap} 0 0 100% 100% ""
     Pop $BGImage
-    ${NSD_SetImage} $BGImage $PLUGINSDIR\beijing.bmp $ImageHandle
+    ${NSD_SetImage} $BGImage $PLUGINSDIR\bg.bmp $ImageHandle
 
 
     GetFunctionAddress $0 onGUICallback
@@ -639,7 +665,9 @@ FunctionEnd
 Function MessgesboxPage
 	IsWindow $WarningForm Create_End
 	!define Style ${WS_VISIBLE}|${WS_OVERLAPPEDWINDOW}
+  SetCtlColors $hwndparent "" transparent
 	${NSW_CreateWindowEx} $WarningForm $hwndparent ${ExStyle} ${Style} "" 1018
+
 
 	;${NSW_SetWindowSize} $WarningForm 382 202
 	System::Call "user32::MoveWindow(i $WarningForm, i 0, i 0, i 382, i 202) i r2"
@@ -649,33 +677,35 @@ Function MessgesboxPage
 
 	${NSW_CreateButton} 225 169 72 24 'Yes'
 	Pop $1
-  SkinBtn::Set /IMGID=$PLUGINSDIR\btn_btn.bmp $1
+  SkinBtn::Set /IMGID=$PLUGINSDIR\btn_install.bmp $1
   GetFunctionAddress $3 onClickclos
   SkinBtn::onClick $1 $3
+  SendMessage $1 ${WM_SETFONT} "$2" 0
+
 
 	${NSW_CreateButton} 303 169 72 24 'Cancel'
 	Pop $1
-  SkinBtn::Set /IMGID=$PLUGINSDIR\btn_btn.bmp $1
+  SkinBtn::Set /IMGID=$PLUGINSDIR\btn_install.bmp $1
   GetFunctionAddress $3 OnClickQuitCancel
   SkinBtn::onClick $1 $3
+  SendMessage $1 ${WM_SETFONT} "$2" 0
 
   ;Close button
-  ${NSW_CreateButton} 350 1 31 18 ""
-	Pop $1
-  SkinBtn::Set /IMGID=$PLUGINSDIR\btn_clos.bmp $1
-  GetFunctionAddress $3 OnClickQuitCancel
-  SkinBtn::onClick $1 $3
+  ; ${NSW_CreateButton} 350 1 31 18 ""
+	; Pop $1
+  ; SkinBtn::Set /IMGID=$PLUGINSDIR\btn_clos.bmp $1
+  ; GetFunctionAddress $3 OnClickQuitCancel
+  ; SkinBtn::onClick $1 $3
 
  	;Exit prompt
   ${NSW_CreateLabel} 17% 95 170u 9u "Determine to exit${PRODUCT_NAME}Is it installed?"
   Pop $R3
-  ;SetCtlColors $R2 "" 0xFFFFFF ;blue
+
   SetCtlColors $R3 "636363"  transparent ;Constant background
 
  	;Left corner text
   ${NSW_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME}"
   Pop $R2
-  ;SetCtlColors $R2 "" 0xFFFFFF ;blue
   SetCtlColors $R2 "666666"  transparent ;Constant background
 
 	;Exclamation mark
@@ -707,43 +737,43 @@ DetailPrint "Installing${PRODUCT_NAME}..."
 SetDetailsPrint None ;Do not display information
 nsisSlideshow::Show /NOUNLOAD /auto=$PLUGINSDIR\Slides.dat
 SetOutPath $INSTDIR
-; Sleep 50
-; Sleep 50
-; Sleep 50
-; Sleep 500
-; Sleep 50
-; Sleep 50
-; Sleep 50
-; Sleep 50
-; Sleep 50
-; Sleep 50
-; Sleep 50
-; Sleep 50
-; Sleep 50
-; Sleep 500
-; Sleep 50
-; Sleep 50
-; Sleep 50
-; Sleep 50
-; Sleep 50
-; Sleep 50
-; Sleep 50
-; Sleep 500
-; Sleep 50
-; Sleep 50
-; Sleep 50
-; Sleep 50
-; Sleep 50
-; Sleep 50
-; Sleep 50
-; Sleep 500
-; Sleep 50
-; Sleep 50
-; Sleep 50
-; Sleep 50
-; Sleep 50
-; Sleep 50
-; Sleep 50
+Sleep 50
+Sleep 50
+Sleep 50
+Sleep 500
+Sleep 50
+Sleep 50
+Sleep 50
+Sleep 50
+Sleep 50
+Sleep 50
+Sleep 50
+Sleep 50
+Sleep 50
+Sleep 500
+Sleep 50
+Sleep 50
+Sleep 50
+Sleep 50
+Sleep 50
+Sleep 50
+Sleep 50
+Sleep 500
+Sleep 50
+Sleep 50
+Sleep 50
+Sleep 50
+Sleep 50
+Sleep 50
+Sleep 50
+Sleep 500
+Sleep 50
+Sleep 50
+Sleep 50
+Sleep 50
+Sleep 50
+Sleep 50
+Sleep 50
 ; Sleep 50
 ; Sleep 50
 ; Sleep 50
@@ -825,7 +855,8 @@ FunctionEnd
 #Turn off code
 #------------------------------------------
 Function onClickclos
-SendMessage $hwndparent ${WM_CLOSE} 0 0  ;closure
+    Delete "$PLUGINSDIR\minecraft_font.ttf"
+    SendMessage $hwndparent ${WM_CLOSE} 0 0  ;closure
 FunctionEnd
 
 Function OnClickQuitCancel
@@ -928,7 +959,7 @@ Function UninstallSoft
 	Goto done
 ;Running uninstaller
 uninst:
-  MessageBox MB_ICONQUESTION|MB_YESNO|MB_TOPMOST "系统已存在${PRODUCT_NAME}，是否卸载？" IDYES +2
+  MessageBox MB_ICONQUESTION|MB_YESNO|MB_TOPMOST "System already exists${PRODUCT_NAME}Is it uninstalled?" IDYES +2
   Goto done
   ExecWait "$R0 /S _?=$R1" ;Here $ r0 is the name of the uninstaller read, / s is a silent uninstall parameter using the NSIS generated uninstaller must be added _? Can you wait to uninstall.$ R1 is the software location
   IfFileExists "$R1" dir ;If the $ r1 software location also has files to Dir: Delete all files
@@ -974,7 +1005,7 @@ Function un.Page.5
     ${EndIf}
     SetCtlColors $0 ""  transparent ;Constant background
 
-    ${NSW_SetWindowSize} $0 498 373 ;Change the form of form
+    ${NSW_SetWindowSize} $0 530 250 ;Change the form of form
 
 
     ${NSD_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME} Uninstall"
@@ -992,27 +1023,27 @@ Function un.Page.5
     SetCtlColors $2 "666666"  transparent ;Constant background
 
     ;Create a cancel button
-    ${NSD_CreateButton} 416 339 72 24 "Cancel"
+    ${NSD_CreateButton} 65 192 160 40 "Cancel"
     Pop $0
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_btn.bmp $0
     GetFunctionAddress $3 un.onClickclos
     SkinBtn::onClick $0 $3
 
-    ${NSD_CreateButton} 338 339 72 24 "Uninstall"
+    ${NSD_CreateButton} 319 192 160 40 "Uninstall"
     Pop $R0
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_btn.bmp $R0
     GetFunctionAddress $3 un.onClickins
     SkinBtn::onClick $R0 $3
 
     ;Minimize button
-    ${NSD_CreateButton} 434 1 31 18 ""
+    ${NSD_CreateButton}  ${BTN_MINI_POS} ""
     Pop $0
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_mini.bmp $0
     GetFunctionAddress $3 un.onClickmini
     SkinBtn::onClick $0 $3
 
     ;Close button
-    ${NSD_CreateButton} 465 1 31 18 ""
+    ${NSD_CreateButton} ${BTN_CLOSE_POS} ""
     Pop $0
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_clos.bmp $0
     GetFunctionAddress $3 un.onClickclos
@@ -1021,7 +1052,7 @@ Function un.Page.5
     ;Sticker background big picture
     ${NSD_CreateBitmap} 0 0 100% 100% ""
     Pop $BGImage
-    ${NSD_SetImage} $BGImage $PLUGINSDIR\beijing.bmp $ImageHandle
+    ${NSD_SetImage} $BGImage $PLUGINSDIR\bg.bmp $ImageHandle
 
 
     GetFunctionAddress $0 un.onGUICallback
@@ -1056,7 +1087,7 @@ Function un.InstFiles.Show
     WndProc::onCallback $R0 $0 ;Handling borderless form movement
 
     GetDlgItem $R1 $BCSJ 1006  ;Get 1006 controls set color and change position
-    SetCtlColors $R1 ""  F6F6F6 ;Background f6f6f6,注意颜色不能设为透明，否则重叠
+    SetCtlColors $R1 ""  F6F6F6 ;Background f6f6f6,Note that the color cannot be set to transparent, otherwise overlapping
     System::Call "user32::MoveWindow(i R1, i 30, i 82, i 440, i 12) i r2"
 
     GetDlgItem $R3 $BCSJ 1990  ;Get 1006 controls set color and change position
@@ -1075,7 +1106,7 @@ Function un.InstFiles.Show
 
     GetDlgItem $R5 $BCSJ 1992  ;Get 1006 controls set color and change position
     System::Call "user32::MoveWindow(i R5, i 416, i 339, i 72, i 24) i r2"
-    ${NSD_SetText} $R5 "安装"
+    ${NSD_SetText} $R5 "Install"
 		SkinBtn::Set /IMGID=$PLUGINSDIR\btn_btn.bmp $R5
 		;GetFunctionAddress $3 un.onClickins
     SkinBtn::onClick $R5 $3
@@ -1084,7 +1115,7 @@ Function un.InstFiles.Show
     GetDlgItem $R7 $BCSJ 1993  ;Get 1993 Control Sets Colors and change the location
     SetCtlColors $R7 "666666"  transparent ;
     System::Call "user32::MoveWindow(i R7, i 38, i 12, i 150, i 12) i r2"
-    ${NSD_SetText} $R7 "${PRODUCT_NAME} 安装" ;设置某个控件的 text 文本
+    ${NSD_SetText} $R7 "${PRODUCT_NAME} Install" ;Set the text text for a control
 
 
     GetDlgItem $R8 $BCSJ 1016  ;Get 1006 controls set color and change position
@@ -1118,7 +1149,7 @@ Function un.Page.6
     ${EndIf}
     SetCtlColors $0 ""  transparent ;Constant background
 
-    ${NSW_SetWindowSize} $0 498 373 ;Change the form of form
+    ${NSW_SetWindowSize} $0 530 250 ;Change the form of form
 
     ${NSD_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME} Uninstall"
     Pop $2
@@ -1135,21 +1166,21 @@ Function un.Page.6
     SetCtlColors $2 666666  transparent ;Constant background
 
     ;Complete button
-    ${NSD_CreateButton} 416 339 72 24 "Finish"
+    ${NSD_CreateButton} 352 192 162 40 "Finish"
     Pop $2
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_btn.bmp $2
     GetFunctionAddress $3 un.onClickend
     SkinBtn::onClick $2 $3
 
     ;Minimize button
-    ${NSD_CreateButton} 434 1 31 18 ""
+    ${NSD_CreateButton} ${BTN_MINI_POS} ""
     Pop $0
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_mini.bmp $0
     GetFunctionAddress $3 un.onClickmini
     SkinBtn::onClick $0 $3
 
     ;Close button
-    ${NSD_CreateButton} 465 1 31 18 ""
+    ${NSD_CreateButton} ${BTN_CLOSE_POS} ""
     Pop $0
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_clos.bmp $0
     GetFunctionAddress $3 un.onClickclos
@@ -1174,10 +1205,9 @@ FunctionEnd
 
 Function un.onInit
     InitPluginsDir
-    File `/ONAME=$PLUGINSDIR\BeiJing.bmp` `images\BeiJing.bmp`
+    File `/ONAME=$PLUGINSDIR\bg.bmp` `images\bdyun.bmp`
     File `/oname=$PLUGINSDIR\btn_clos.bmp` `images\clos.bmp`
     File `/oname=$PLUGINSDIR\btn_mini.bmp` `images\mini.bmp`
-    File `/oname=$PLUGINSDIR\btn_in.bmp` `images\in.bmp`
     File `/oname=$PLUGINSDIR\btn_btn.bmp` `images\btn.bmp`
 
 		;Progress strip skin
