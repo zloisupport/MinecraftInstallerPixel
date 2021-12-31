@@ -1,12 +1,12 @@
 !system '>blank set/p=MSCF<nul'
 !packhdr temp.dat 'cmd /c Copy /b temp.dat /b +blank&&del blank'
 
-Var MSG     ;MSG变量必须定义，而且在最前面，否则WndProc::onCallback不工作，插件中需要这个消息变量,用于记录消息信息
-Var Dialog  ;Dialog变量也需要定义，他可能是NSIS默认的对话框变量用于保存窗体中控件的信息
+Var MSG    ; The MSG variable must be defined, and at the forefrone, otherwise, WndProc :: OnCallback does not work, the plugin needs this message variable for recording message information.
+Var Dialog  ;Dialog variables also need to be defined, which may be NSIS default dialog variables for saving controls in the form.
 
-Var BGImage  ;背景大图
+Var BGImage  ;Background big picture
 Var ImageHandle
-Var THImage   ;叹号
+Var THImage   ;Exclamation mark
 Var BCSJ
 
 Var WarningForm
@@ -36,41 +36,42 @@ Var Checkbox4
 Var Checkbox_State4
 Var Checkbox4_State
 
-;---------------------------全局编译脚本预定义的常量-----------------------------------------------------
-!define PRODUCT_NAME "BaiDuYun"
-!define PRODUCT_DIR "BaiDuYun"
-!define PRODUCT_VERSION "3.7.0.0"
-!define PRODUCT_PUBLISHER "baidu.com, Inc."
-!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\DesktopHook64.exe" ;请自行修改
+;---------------------------Global compilation script predefined constant-----------------------------------------------------
+!define PRODUCT_NAME "Minecraft"
+!define PRODUCT_DIR "Minecraft"
+!define PRODUCT_VERSION "1.7.0.0"
+!define PRODUCT_PUBLISHER "Minecraft, Inc."
+!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\Minecraft.exe" ;Please modify your own
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
+!define BTN_MINI_POS "449 14 11 11"
+!define BTN_CLOSE_POS "481 14 11 11"
+ShowInstDetails nevershow ;Set whether to display the installation details.
+ShowUnInstDetails nevershow ;Set whether to display delete details.
 
-ShowInstDetails nevershow ;设置是否显示安装详细信息。
-ShowUnInstDetails nevershow ;设置是否显示删除详细信息。
-
-;应用程序显示名字
+;Application display name
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-;应用程序输出文件名
+;Application output file name
 OutFile "${PRODUCT_NAME} ${PRODUCT_VERSION}.exe"
-;默认安装目录
+;Default installation directory
 InstallDir "$PROGRAMFILES\${PRODUCT_DIR}"
 InstallDirRegKey HKLM "${PRODUCT_UNINST_KEY}" "UninstallString"
 
-; MUI 预定义常量
-;!define MUI_ABORTWARNING ;退出提示
-;安装图标的路径名字
+; MUI Predefined constant
+;!define MUI_ABORTWARNING ;Exit prompt
+;Path name of the icon
 !define MUI_ICON "Icon\BaiduYun.ico"
-;卸载图标的路径名字
+;Uninstall the path name of the icon
 !define MUI_UNICON "Icon\BaiduYun.ico"
-;使用的UI
+;UI use
 !define MUI_UI "UI\mod.exe"
 
 
-;---------------------------设置软件压缩类型（也可以通过外面编译脚本控制）------------------------------------
+;---------------------------Set software compression type (can also be controlled by external compilation)------------------------------------
 SetCompressor lzma
 SetCompress force
 XPStyle on
-; ------ MUI 现代界面定义 (1.67 版本以上兼容) ------
+; ------ MUI Modern interface definition (1.67 Version above is compatible) ------
 !include "MUI2.nsh"
 !include "WinCore.nsh"
 !include "nsWindows.nsh"
@@ -79,17 +80,17 @@ XPStyle on
 
 !define MUI_CUSTOMFUNCTION_GUIINIT onGUIInit
 
-;自定义页面
-Page custom Page.1
+;Custom page
+ Page custom Page.1
 
 Page custom Page.2 Page.2leave
-; 许可协议页面
+; License agreement page
 ;!define MUI_LICENSEPAGE_CHECKBOX
 
-; 安装目录选择页面
+; Install Directory Selection Page
 
 ;!insertmacro MUI_PAGE_DIRECTORY
-; 安装过程页面
+; Install the process page
 ;!define MUI_PAGE_CUSTOMFUNCTION_PRO InstFilesPagePRO
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW InstFilesPageShow
 !insertmacro MUI_PAGE_INSTFILES
@@ -97,9 +98,9 @@ Page custom Page.2 Page.2leave
 Page custom Page.3
 
 Page custom Page.4
-; 安装完成页面
+; Install completion page
 ;!insertmacro MUI_PAGE_FINISH
-; 安装卸载过程页面
+; Install uninstall process page
 UninstPage custom un.Page.5
 
 UninstPage instfiles un.InstFiles.PRO un.InstFiles.Show
@@ -109,11 +110,12 @@ UninstPage custom un.Page.6
 UninstPage custom un.Page.7
 
 
-; 安装界面包含的语言设置
+; Installing the language settings included
 !insertmacro MUI_LANGUAGE "SimpChinese"
 !insertmacro MUI_LANGUAGE "English"
+!insertmacro MUI_LANGUAGE "Russian"
 
-;------------------------------------------------------MUI 现代界面定义以及函数结束------------------------
+;------------------------------------------------------MUI Modern interface definition and ending function------------------------
 
 Function .onInit
     InitPluginsDir
@@ -127,7 +129,9 @@ Function .onInit
 	Push ${LANG_TRADCHINESE}
 	Push "Traditional Chinese"
 	Push ${LANG_SIMPCHINESE}
-	Push "Simplified Chinese"
+	Push "Simplified Chinese"	
+  Push ${LANG_RUSSIAN}
+	Push "Русский язык"
 	Push A ; A means auto count languages
 	       ; for the auto count to work the first empty push (Push "") must remain
 	LangDLL::LangDialog "Installer Language" "Please select the language of the installer"
@@ -144,12 +148,15 @@ Function .onInit
     File `/oname=$PLUGINSDIR\mgbg.bmp` `images\Message.bmp`
     File `/ONAME=$PLUGINSDIR\BeiJing.bmp` `images\BeiJing.bmp`
     File `/oname=$PLUGINSDIR\btn_clos.bmp` `images\clos.bmp`
+    File `/oname=$PLUGINSDIR\btn_install.bmp` `images\btn_install.bmp`
     File `/oname=$PLUGINSDIR\btn_mini.bmp` `images\mini.bmp`
+    File `/oname=$PLUGINSDIR\btn_dir.bmp` `images\btn_dir.bmp`
     File `/oname=$PLUGINSDIR\btn_in.bmp` `images\in.bmp`
     File `/oname=$PLUGINSDIR\btn_btn.bmp` `images\btn.bmp`
     File `/oname=$PLUGINSDIR\TanHao.bmp` `images\TanHao.bmp`
+    File `/oname=$PLUGINSDIR\TextBox.bmp` `images\TextBox.bmp`
 
-		;进度条皮肤
+		;Progress strip skin
 	  File `/oname=$PLUGINSDIR\Progress.bmp` `images\Progress.bmp`
   	File `/oname=$PLUGINSDIR\ProgressBar.bmp` `images\ProgressBar.bmp`
 
@@ -157,13 +164,14 @@ Function .onInit
     SkinBtn::Init "$PLUGINSDIR\btn_in.bmp"
     SkinBtn::Init "$PLUGINSDIR\btn_mini.bmp"
 		SkinBtn::Init "$PLUGINSDIR\btn_clos.bmp"
+		SkinBtn::Init "$PLUGINSDIR\btn_install.bmp"
 FunctionEnd
 
 Function onGUIInit
 
-    ;消除边框
+    ;Eliminate border
     System::Call `user32::SetWindowLong(i$HWNDPARENT,i${GWL_STYLE},0x9480084C)i.R0`
-    ;隐藏一些既有控件
+    ;Hidden some controls
     GetDlgItem $0 $HWNDPARENT 1034
     ShowWindow $0 ${SW_HIDE}
     GetDlgItem $0 $HWNDPARENT 1035
@@ -181,9 +189,9 @@ Function onGUIInit
     GetDlgItem $0 $HWNDPARENT 1028
     ShowWindow $0 ${SW_HIDE}
 
-    ${NSW_SetWindowSize} $HWNDPARENT 530 250 ;改变主窗体大小
+    ${NSW_SetWindowSize} $HWNDPARENT 530 450 ;530  250                    Change the main form
     System::Call User32::GetDesktopWindow()i.R0
-    ;圆角
+    ;Rounded
     System::Alloc 16
   	System::Call user32::GetWindowRect(i$HWNDPARENT,isR0)
   	System::Call *$R0(i.R1,i.R2,i.R3,i.R4)
@@ -195,20 +203,20 @@ Function onGUIInit
 		Call UninstallSoft
 FunctionEnd
 
-;处理无边框移动
+;Processing boundless box movement
 Function onGUICallback
   ${If} $MSG = ${WM_LBUTTONDOWN}
     SendMessage $HWNDPARENT ${WM_NCLBUTTONDOWN} ${HTCAPTION} $0
   ${EndIf}
 FunctionEnd
-;弹出对话框移动
+;Popup dialog movement
 Function onWarningGUICallback
   ${If} $MSG = ${WM_LBUTTONDOWN}
     SendMessage $WarningForm ${WM_NCLBUTTONDOWN} ${HTCAPTION} $0
   ${EndIf}
 FunctionEnd
 
-
+# Welcome Page
 Function Page.1
 
     GetDlgItem $0 $HWNDPARENT 1
@@ -229,72 +237,72 @@ Function Page.1
     ${If} $0 == error
         Abort
     ${EndIf}
-    SetCtlColors $0 ""  transparent ;背景设成透明
+    SetCtlColors $0 5  transparent ;Constant background
 
-    ${NSW_SetWindowSize} $0 498 373 ;改变Page大小
+    ${NSW_SetWindowSize} $0 530 450 ;530  250      Change the size of the PAGE
 
-		;XXX安装向导
-    ${NSD_CreateLabel} 1u 130u 493U 18u "欢迎使用${PRODUCT_NAME}安装向导"
+		;XXX Installation Wizard
+    ${NSD_CreateLabel} 1u 130u 493U 18u "Welcome ${PRODUCT_NAME}Setup Wizard"
     Pop $lbl_zhuye
-    SetCtlColors $lbl_zhuye "" transparent ;背景设成透明
-    CreateFont $1 "宋体" "11" "800"
+    SetCtlColors $lbl_zhuye "" transparent ;Constant background
+    CreateFont $1 "Segoe UI" "11" "800"
     SendMessage $lbl_zhuye ${WM_SETFONT} $1 0
     ${NSD_AddStyle} $lbl_zhuye ${ES_CENTER}
 
-		;标题文字
-    ${NSD_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME} 安装"
+		;Title text
+    ${NSD_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME} Install"
     Pop $lbl_biaoti
-    ;SetCtlColors $lbl_biaoti "" 0xFFFFFF ;蓝色
-    SetCtlColors $lbl_biaoti "666666"  transparent ;背景设成透明
+    ;SetCtlColors $lbl_biaoti "" 0xFFFFFF ;blue
+    SetCtlColors $lbl_biaoti "666666"  transparent ;Constant background
 
-    ;自定义安装按钮
-    ${NSD_CreateButton} 120u 185u 136 32 "自定义安装"
+    ;Custom installation button
+    ${NSD_CreateButton} 120u 185u 136 32 "Custom installation"
     Pop $btn_ins
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_in.bmp $btn_ins
-    SetCtlColors $btn_ins "808080"  transparent ;背景设成透明
+    SetCtlColors $btn_ins "808080"  transparent ;Constant background
     GetFunctionAddress $3 onClickins
     SkinBtn::onClick $btn_ins $3
 
-    ;快速安装按钮
-    ${NSD_CreateButton} 120u 153u 136 32 "快速安装(推荐)"
+    ;Quick installation button
+    ${NSD_CreateButton} 120u 153u 136 32 "Quick installation (recommended)"
     Pop $btn_in
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_in.bmp $btn_in
-    SetCtlColors $btn_in "808080"  transparent ;背景设成透明
+    SetCtlColors $btn_in "808080"  transparent ;Constant background
     GetFunctionAddress $3 onClickin
     SkinBtn::onClick $btn_in $3
 
 
-		;标题文字
-    ${NSD_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME} 安装"
+		;Title text
+    ${NSD_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME} Install"
     Pop $lbl_biaoti
-    ;SetCtlColors $lbl_biaoti "" 0xFFFFFF ;蓝色
-    SetCtlColors $lbl_biaoti "666666"  transparent ;背景设成透明
+    ;SetCtlColors $lbl_biaoti "" 0xFFFFFF ;blue
+    SetCtlColors $lbl_biaoti "666666"  transparent ;Constant background
     
-    ;最小化按钮
-    ${NSD_CreateButton} 434 1 31 18 ""
+    ;Minimize button
+    ${NSD_CreateButton} ${BTN_MINI_POS} ""
     Pop $0
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_mini.bmp $0
     GetFunctionAddress $3 onClickmini
     SkinBtn::onClick $0 $3
 
-    ;关闭按钮
-    ${NSD_CreateButton} 465 1 31 18 ""
+    ;Close button
+    ${NSD_CreateButton} ${BTN_CLOSE_POS} ""
     Pop $0
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_clos.bmp $0
     GetFunctionAddress $3 MessgesboxPage
     SkinBtn::onClick $0 $3
 
-    ;贴背景大图
+    ;Sticker background big picture
     ${NSD_CreateBitmap} 0 0 100% 100% ""
     Pop $BGImage
     ${NSD_SetImage} $BGImage $PLUGINSDIR\bg.bmp $ImageHandle
 
     GetFunctionAddress $0 onGUICallback
-    WndProc::onCallback $BGImage $0 ;处理无边框窗体移动
+    WndProc::onCallback $BGImage $0 ;Handling borderless form movement
     nsDialogs::Show
     ${NSD_FreeImage} $ImageHandle
 FunctionEnd
-
+# Directory Page
 Function Page.2
 
     GetDlgItem $0 $HWNDPARENT 1
@@ -315,53 +323,53 @@ Function Page.2
     ${If} $0 == error
         Abort
     ${EndIf}
-    SetCtlColors $0 ""  transparent ;背景设成透明
+    SetCtlColors $0 ""  transparent ;Constant background
 
-    ${NSW_SetWindowSize} $0 498 373 ;改变Page大小
+   ${NSW_SetWindowSize} $0 530 450 ;530  250 ;Change the size of the PAGE
 
-    ;安装按钮
-    ${NSD_CreateButton} 416U 339U 72U 24U "安装"
+    ;Install button
+    ${NSD_CreateButton} 352 192 162 40 "Install"
     Pop $0
-    SkinBtn::Set /IMGID=$PLUGINSDIR\btn_BTN.bmp $0
+    SkinBtn::Set /IMGID=$PLUGINSDIR\btn_install.bmp $0
     GetFunctionAddress $3 onClickinst
     SkinBtn::onClick $0 $3
 
-		;标题文字
-    ${NSD_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME} 安装"
+		;Title text
+    ${NSD_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME} Install"
     Pop $lbl_biaoti
-    ;SetCtlColors $lbl_biaoti "" 0xFFFFFF ;蓝色
-    SetCtlColors $lbl_biaoti "666666"  transparent ;背景设成透明
+    ;SetCtlColors $lbl_biaoti "" 0xFFFFFF ;blue
+    SetCtlColors $lbl_biaoti "666666"  transparent ;Constant background
 
 
-		;路径选择
-    ${NSD_CreateLabel} 36 110u 130 13u "选择组件："
+		;Path Selection
+    ${NSD_CreateLabel} 36 110u 130 13u "Select component:"
     Pop $0
-    SetCtlColors $0 ""  transparent ;背景设成透明
-;    CreateFont $1 "宋体" "11" "800"
+    SetCtlColors $0 ""  transparent ;Constant background
+;    CreateFont $1 "Segoe UI" "11" "800"
 ;    SendMessage $0 ${WM_SETFONT} $1 0
 
-		;路径选择
-    ${NSD_CreateLabel} 36 90 130u 12u "安装目录："
+		;Path Selection
+    ${NSD_CreateLabel} 36 90 130u 12u "Installation Directory:"
     Pop $0
-    SetCtlColors $0 ""  transparent ;背景设成透明
-   ; CreateFont $1 "宋体" "11" "800"
+    SetCtlColors $0 ""  transparent ;Constant background
+   ; CreateFont $1 "Segoe UI" "11" "800"
    ; SendMessage $3 ${WM_SETFONT} $1 0
 
 #------------------------------------------
-#可选项1
+#Option 1
 #------------------------------------------    
-    ${NSD_CreateCheckbox} 36 130u 12u 12u ""
-    Pop $Checkbox1
-    SetCtlColors $Checkbox1 "" "f7f7f7"
-		;${NSD_SetState} $Checkbox1 ${BST_CHECKED}
+    ; ${NSD_CreateCheckbox} 19 130u 12u 12u ""
+    ; Pop $Checkbox1
+    ; SetCtlColors $Checkbox1 "" "f7f7f7"
+		; ;${NSD_SetState} $Checkbox1 ${BST_CHECKED}
 
 
-		${NSD_CreateLabel} 36u 131u 100u 12u "可选项目一"
-		Pop $Checkbox_State1
-    SetCtlColors $Checkbox_State1 ""  transparent ;前景色,背景设成透明
-    ${NSD_OnClick} $Checkbox_State1 onCheckbox1
+		; ${NSD_CreateLabel} 19u 131u 100u 12u "Optional 1"
+		; Pop $Checkbox_State1
+    ; SetCtlColors $Checkbox_State1 ""  transparent ;Foreground,Constant background
+    ; ${NSD_OnClick} $Checkbox_State1 onCheckbox1
 #------------------------------------------
-#可选项2
+#Option 2
 #------------------------------------------
     ${NSD_CreateCheckbox} 36 150u 12u 12u ""
     Pop $Checkbox2
@@ -369,86 +377,94 @@ Function Page.2
 		${NSD_SetState} $Checkbox3 ${BST_CHECKED}
 		;ShowWindow $Checkbox2 ${SW_HIDE}
 		
-		${NSD_CreateLabel} 36u 151u 100u 12u "可选项目二"
+		${NSD_CreateLabel} 36u 151u 100u 12u "Optional 2"
 		Pop $Checkbox_State2
-    SetCtlColors $Checkbox_State2 ""  transparent ;前景色,背景设成透明
+    SetCtlColors $Checkbox_State2 ""  transparent ;Foreground,Constant background
     ${NSD_OnClick} $Checkbox_State2 onCheckbox2
-    ;ShowWindow $Checkbox_State2 ${SW_HIDE}   ;当你不使用该选项时，可以隐藏
+    ;ShowWindow $Checkbox_State2 ${SW_HIDE}   ;When you don't use this option, you can hide
 #------------------------------------------
-#可选项3
+#Option 3
 #------------------------------------------
-    ${NSD_CreateCheckbox} 36 170u 12u 12u ""
-    Pop $Checkbox3
-		SetCtlColors $Checkbox3 "" "f5f5f5"
-		${NSD_SetState} $Checkbox3 ${BST_CHECKED}
-		;ShowWindow $Checkbox3 ${SW_HIDE}  ;当你不使用该选项时，可以隐藏
+    ; ${NSD_CreateCheckbox} 36 170u 12u 12u ""
+    ; Pop $Checkbox3
+		; SetCtlColors $Checkbox3 "" "f5f5f5"
+		; ${NSD_SetState} $Checkbox3 ${BST_CHECKED}
+		; ;ShowWindow $Checkbox3 ${SW_HIDE}  ;When you don't use this option, you can hide
 
-		${NSD_CreateLabel} 36u 171u 100u 12u "可选项目三"
-		Pop $Checkbox_State3
-    SetCtlColors $Checkbox_State3 ""  transparent ;前景色,背景设成透明
-    ${NSD_OnClick} $Checkbox_State3 onCheckbox3
-    ;ShowWindow $Checkbox_State3 ${SW_HIDE}  ;当你不使用该选项时，可以隐藏
+		; ${NSD_CreateLabel} 36u 171u 100u 12u "Optional item three"
+		; Pop $Checkbox_State3
+    ; SetCtlColors $Checkbox_State3 ""  transparent ;Foreground,Constant background
+    ; ${NSD_OnClick} $Checkbox_State3 onCheckbox3
+    ; ;ShowWindow $Checkbox_State3 ${SW_HIDE}  ;When you don't use this option, you can hide
 #------------------------------------------
-#可选项4
+#Option 4
 #------------------------------------------
-    ${NSD_CreateCheckbox} 36 190u 12u 12u ""
-    Pop $Checkbox4
-		SetCtlColors $Checkbox4 "" "f6f6f6"
-		${NSD_SetState} $Checkbox4 ${BST_CHECKED}
-		;ShowWindow $Checkbox4 ${SW_HIDE}  ;当你不使用该选项时，可以隐藏
+    ; ${NSD_CreateCheckbox} 36 190u 12u 12u ""
+    ; Pop $Checkbox4
+		; SetCtlColors $Checkbox4 "" "f6f6f6"
+		; ${NSD_SetState} $Checkbox4 ${BST_CHECKED}
+		; ;ShowWindow $Checkbox4 ${SW_HIDE}  ;When you don't use this option, you can hide
 		
-		${NSD_CreateLabel} 36u 191u 100u 12u "可选项目四"
-		Pop $Checkbox_State4
-    SetCtlColors $Checkbox_State4 ""  transparent ;前景色,背景设成透明
-    ${NSD_OnClick} $Checkbox_State4 onCheckbox4
-    ;ShowWindow $Checkbox_State4 ${SW_HIDE}  ;当你不使用该选项时，可以隐藏
+		; ${NSD_CreateLabel} 36u 191u 100u 12u "Optional item four"
+		; Pop $Checkbox_State4
+    ; SetCtlColors $Checkbox_State4 ""  transparent ;前景色,Constant background
+    ; ${NSD_OnClick} $Checkbox_State4 onCheckbox4
+    ; ;ShowWindow $Checkbox_State4 ${SW_HIDE}  ;When you don't use this option, you can hide
     
-#可选项完成!
+#Optional!
 #------------------------------------------
 
-    ;最小化按钮
-    ${NSD_CreateButton} 434 1 31 18 ""
+    ;Minimize button
+    ${NSD_CreateButton} ${BTN_MINI_POS} ""
     Pop $0
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_mini.bmp $0
     GetFunctionAddress $3 onClickmini
     SkinBtn::onClick $0 $3
 
-    ;关闭按钮
-    ${NSD_CreateButton} 465 1 31 18 ""
+    ;Close button
+    ${NSD_CreateButton} ${BTN_CLOSE_POS} ""
     Pop $0
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_clos.bmp $0
     GetFunctionAddress $3 MessgesboxPage
     SkinBtn::onClick $0 $3
-    
-		;创建安装目录输入文本框
-  	${NSD_CreateText} 36 120 350 24 $INSTDIR
+
+    ;Create a change path folder button
+    ${NSD_CreateButton} 27 201 21 21  "" 
+		Pop $btn_Browser
+		SkinBtn::Set /IMGID=$PLUGINSDIR\btn_dir.bmp $btn_Browser
+		GetFunctionAddress $3 onButtonClickSelectPath
+    SkinBtn::onClick $btn_Browser $3
+		;ShowWindow $btn_Browser ${SW_HIDE}
+
+
+		;Create an installation directory Enter text box
+  	${NSD_CreateText} 53 203 281 20 $INSTDIR ${WS_EX_CLIENTEDGE}|${WS_EX_TRANSPARENT}
 		Pop $Txt_Browser
-    CreateFont $1 "tahoma" "10" "500"
+    SetCtlColors $Txt_Browser 0xffffff 0x8b8b8b
+    CreateFont $1 "tahoma" "12" "500"
     SendMessage $Txt_Browser ${WM_SETFONT} $1 1
 		;ShowWindow $Txt_Browser ${SW_HIDE}
 
 
-    ;创建更改路径文件夹按钮
-    ${NSD_CreateButton} 395U 120U 72U 16u  "浏览"
-		Pop $btn_Browser
-		SkinBtn::Set /IMGID=$PLUGINSDIR\btn_btn.bmp $btn_Browser
-		GetFunctionAddress $3 onButtonClickSelectPath
-    SkinBtn::onClick $btn_Browser $3
-		;ShowWindow $btn_Browser ${SW_HIDE}
-    
-    ;贴背景大图
+    ${NSD_CreateBitmap} 19 192 330 40 ""
+    Pop $BGImage
+    ${NSD_SetImage} $BGImage $PLUGINSDIR\TextBox.bmp $ImageHandle
+
+    ;Sticker background big picture
     ${NSD_CreateBitmap} 0 0 100% 100% ""
     Pop $BGImage
-    ${NSD_SetImage} $BGImage $PLUGINSDIR\beijing.bmp $ImageHandle
+    ${NSD_SetImage} $BGImage $PLUGINSDIR\bg.bmp $ImageHandle
+
+
 
     GetFunctionAddress $0 onGUICallback
-    WndProc::onCallback $BGImage $0 ;处理无边框窗体移动
+    WndProc::onCallback $BGImage $0 ;Handling borderless form movement
     nsDialogs::Show
     ${NSD_FreeImage} $ImageHandle
 FunctionEnd
 
 #----------------------------------------------
-#存储4个选项状态
+#Store 4 option status
 #----------------------------------------------
 Function Page.2leave
    ${NSD_GetState} $Checkbox1 $Checkbox1_State
@@ -457,7 +473,7 @@ Function Page.2leave
    ${NSD_GetState} $Checkbox4 $Checkbox4_State
 FunctionEnd
 #----------------------------------------------
-#第2个页面完成
+#The second page is completed
 #----------------------------------------------
 
 
@@ -479,56 +495,56 @@ Function  InstFilesPageShow
   File '/oname=$PLUGINSDIR\Play1.png' 'nsisSlideShow\Play1.png'
   File '/oname=$PLUGINSDIR\Play2.png' 'nsisSlideShow\Play2.png'
   File '/oname=$PLUGINSDIR\Play3.png' 'nsisSlideShow\Play3.png'
-		;自定义进度条的颜色样式
-		;取消进度条windows 样式主题风格，改为用自已定义的颜色
+		;Custom progress bar color style
+		;Cancel progress bar Windows Style theme style, changed to the defined colors
 ;		GetDlgItem $2 $R2 1004
 ;		System::Call UxTheme::SetWindowTheme(i,w,w)i(r2, n, n)
-		;SendMessage $2 ${PBM_SETBARCOLOR} 0 0x339a00 ;设置进度条前景色
-		;SendMessage $2 ${PBM_SETBKCOLOR} 0 0xa4a4a4  ;设置进度条背景色
+		;SendMessage $2 ${PBM_SETBARCOLOR} 0 0x339a00 ;Set progress balance color
+		;SendMessage $2 ${PBM_SETBKCOLOR} 0 0xa4a4a4  ;Set progress bar background color
 
-    GetDlgItem $R0 $R2 1004  ;设置进度条位置
+    GetDlgItem $R0 $R2 1004  ;Set progress bar position
     System::Call "user32::MoveWindow(i R0, i 30, i 100, i 440, i 12) i r2"
 
 
-    StrCpy $R0 $R2 ;改变页面大小,不然贴图不能全页
+    StrCpy $R0 $R2 ;Change the page size,Otherwise, the map can not be full
     System::Call "user32::MoveWindow(i R0, i 0, i 0, i 498, i 373) i r2"
     GetFunctionAddress $0 onGUICallback
-    WndProc::onCallback $R0 $0 ;处理无边框窗体移动
+    WndProc::onCallback $R0 $0 ;Handling borderless form movement
     
-    GetDlgItem $R1 $R2 1006  ;获取1006控件设置颜色并改变位置
-    SetCtlColors $R1 ""  F6F6F6 ;背景设成F6F6F6,注意颜色不能设为透明，否则重叠
+    GetDlgItem $R1 $R2 1006  ;Get 1006 controls set color and change position
+    ;SetCtlColors $R1 "F6F6F6"  F6F6F6 Background is set to F6F6F6, pay attention to the color cannot be transparent, otherwise overlapping
     System::Call "user32::MoveWindow(i R1, i 30, i 82, i 440, i 12) i r2"
 
-    GetDlgItem $R3 $R2 1990  ;获取1006控件设置颜色并改变位置
+    GetDlgItem $R3 $R2 1990  ;Get 1006 controls set color and change position
     System::Call "user32::MoveWindow(i R3, i 434, i 1, i 31, i 18) i r2"
 		SkinBtn::Set /IMGID=$PLUGINSDIR\btn_mini.bmp $R3
 		GetFunctionAddress $3 onClickmini
     SkinBtn::onClick $R3 $3
-    ;SetCtlColors $R1 ""  F6F6F6 ;背景设成F6F6F6,注意颜色不能设为透明，否则重叠
+    ;SetCtlColors $R1 ""  F6F6F6 ;Background is set to F6F6F6, pay attention to the color can not be set to transparent, otherwise overlapping
 
-    GetDlgItem $R4 $R2 1991  ;获取1006控件设置颜色并改变位置
+    GetDlgItem $R4 $R2 1991  ;Get 1006 controls set color and change position
     System::Call "user32::MoveWindow(i R4, i 465, i 1, i 31, i 18) i r2" ;改变位置465, 1, 31, 18
 		SkinBtn::Set /IMGID=$PLUGINSDIR\btn_clos.bmp $R4
 		GetFunctionAddress $3 onClickclos
     SkinBtn::onClick $R4 $3
-    EnableWindow $R4 0  ;禁止0为禁止
+    EnableWindow $R4 0  ;No 0 is forbidden
     
-    GetDlgItem $R5 $R2 1992  ;获取1006控件设置颜色并改变位置
+    GetDlgItem $R5 $R2 1992  ;Get 1006 controls set color and change position
     System::Call "user32::MoveWindow(i R5, i 416, i 339, i 72, i 24) i r2"
-    ${NSD_SetText} $R5 "安装"
+    ${NSD_SetText} $R5 "Install"
 		SkinBtn::Set /IMGID=$PLUGINSDIR\btn_btn.bmp $R5
 		;GetFunctionAddress $3 onClickins
     SkinBtn::onClick $R5 $3
     EnableWindow $R5 0
 
-    GetDlgItem $R7 $R2 1993  ;获取1993控件设置颜色并改变位置
+    GetDlgItem $R7 $R2 1993  ;Get 1993 Control Sets Colors and change the location
     SetCtlColors $R7 "666666"  transparent ;
     System::Call "user32::MoveWindow(i R7, i 38, i 12, i 150, i 12) i r2"
-    ${NSD_SetText} $R7 "${PRODUCT_NAME} 安装" ;设置某个控件的 text 文本
+    ${NSD_SetText} $R7 "${PRODUCT_NAME} Install" ;Set the text text for a control
 
 
-    GetDlgItem $R8 $R2 1016  ;获取1006控件设置颜色并改变位置
-    SetCtlColors $R8 ""  F6F6F6 ;背景设成F6F6F6,注意颜色不能设为透明，否则重叠
+    GetDlgItem $R8 $R2 1016  ;Get 1006 controls set color and change position
+    SetCtlColors $R8 ""  F6F6F6 ;Background is set to F6F6F6, pay attention to the color can not be set to transparent, otherwise overlapping
     System::Call "user32::MoveWindow(i R8, i 30, i 120, i 440, i 180) i r2"
     
     FindWindow $R2 "#32770" "" $HWNDPARENT
@@ -536,7 +552,7 @@ Function  InstFilesPageShow
     System::Call "user32::MoveWindow(i R0, i 0, i 0, i 498, i 373) i r2"
     ${NSD_SetImage} $R0 $PLUGINSDIR\beijing.bmp $ImageHandle
 
-		;这里是给进度条贴图
+		;Here is the progress bar map
     FindWindow $R2 "#32770" "" $HWNDPARENT
     GetDlgItem $5 $R2 1004
 	  SkinProgress::Set $5 "$PLUGINSDIR\Progress.bmp" "$PLUGINSDIR\ProgressBar.bmp"
@@ -557,58 +573,58 @@ Function Page.3
     ${If} $0 == error
         Abort
     ${EndIf}
-    SetCtlColors $0 ""  transparent ;背景设成透明
+    SetCtlColors $0 ""  transparent ;Constant background
 
-    ${NSW_SetWindowSize} $0 498 373 ;改变Page大小
+    ${NSW_SetWindowSize} $0 498 373 ;Change the size of the PAGE
 
 
-    ${NSD_CreateLabel} 10% 25% 250u 15u '"${PRODUCT_NAME}"安装完成！'
+    ${NSD_CreateLabel} 10% 25% 250u 15u '"${PRODUCT_NAME}"The installation is complete！'
     Pop $2
-    SetCtlColors $2 ""  transparent ;背景设成透明
-    CreateFont $1 "宋体" "11" "700"
+    SetCtlColors $2 ""  transparent ;Constant background
+    CreateFont $1 "Segoe UI" "11" "700"
     SendMessage $2 ${WM_SETFONT} $1 0
 
-    ${NSD_CreateLabel} 10% 31% 250u 12u "${PRODUCT_NAME}已安装到您的电脑中，请单击【完成】。"
+    ${NSD_CreateLabel} 10% 31% 250u 12u "${PRODUCT_NAME}Installed into your computer, please click [Complete]。"
     Pop $2
-    SetCtlColors $2 666666  transparent ;背景设成透明
+    SetCtlColors $2 666666  transparent ;Constant background
 
-		;标题文字
-    ${NSD_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME} 安装"
+		;Title text
+    ${NSD_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME} Install"
     Pop $lbl_biaoti
-    ;SetCtlColors $lbl_biaoti "" 0xFFFFFF ;蓝色
-    SetCtlColors $lbl_biaoti "666666"  transparent ;背景设成透明
+    ;SetCtlColors $lbl_biaoti "" 0xFFFFFF ;blue
+    SetCtlColors $lbl_biaoti "666666"  transparent ;Constant background
 
 
-    ;完成按钮
-    ${NSD_CreateButton} 416 339 72 24 "完成"
+    ;Complete button
+    ${NSD_CreateButton} 416 339 72 24 "Finish"
     Pop $0
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_BTN.bmp $0
     GetFunctionAddress $3 onClickend
     SkinBtn::onClick $0 $3
 
-    ;最小化按钮
-    ${NSD_CreateButton} 434 1 31 18 ""
+    ;Minimize button
+    ${NSD_CreateButton} ${BTN_MINI_POS} ""
     Pop $0
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_mini.bmp $0
     GetFunctionAddress $3 onClickmini
     SkinBtn::onClick $0 $3
 
-    ;关闭按钮
-    ${NSD_CreateButton} 465 1 31 18 ""
+    ;Close button
+    ${NSD_CreateButton} ${BTN_CLOSE_POS} ""
     Pop $0
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_clos.bmp $0
     GetFunctionAddress $3 MessgesboxPage
     SkinBtn::onClick $0 $3
     EnableWindow $0 0
 
-    ;贴背景大图
+    ;Sticker background big picture
     ${NSD_CreateBitmap} 0 0 100% 100% ""
     Pop $BGImage
     ${NSD_SetImage} $BGImage $PLUGINSDIR\beijing.bmp $ImageHandle
 
 
     GetFunctionAddress $0 onGUICallback
-    WndProc::onCallback $BGImage $0 ;处理无边框窗体移动
+    WndProc::onCallback $BGImage $0 ;Handling borderless form movement
     nsDialogs::Show
 
     ${NSD_FreeImage} $ImageHandle
@@ -628,52 +644,52 @@ Function MessgesboxPage
 	;${NSW_SetWindowSize} $WarningForm 382 202
 	System::Call "user32::MoveWindow(i $WarningForm, i 0, i 0, i 382, i 202) i r2"
 	EnableWindow $hwndparent 0
-  ;SetCtlColors $hwndparent ""  transparent ;背景设成透明
+  ;SetCtlColors $hwndparent ""  transparent ;Constant background
 	System::Call `user32::SetWindowLong(i$WarningForm,i${GWL_STYLE},0x9480084C)i.R0`
 
-	${NSW_CreateButton} 225 169 72 24 '确定'
+	${NSW_CreateButton} 225 169 72 24 'Yes'
 	Pop $1
   SkinBtn::Set /IMGID=$PLUGINSDIR\btn_btn.bmp $1
   GetFunctionAddress $3 onClickclos
   SkinBtn::onClick $1 $3
 
-	${NSW_CreateButton} 303 169 72 24 '取消'
+	${NSW_CreateButton} 303 169 72 24 'Cancel'
 	Pop $1
   SkinBtn::Set /IMGID=$PLUGINSDIR\btn_btn.bmp $1
   GetFunctionAddress $3 OnClickQuitCancel
   SkinBtn::onClick $1 $3
 
-  ;关闭按钮
+  ;Close button
   ${NSW_CreateButton} 350 1 31 18 ""
 	Pop $1
   SkinBtn::Set /IMGID=$PLUGINSDIR\btn_clos.bmp $1
   GetFunctionAddress $3 OnClickQuitCancel
   SkinBtn::onClick $1 $3
 
- 	;退出提示
-  ${NSW_CreateLabel} 17% 95 170u 9u "确定要退出${PRODUCT_NAME}安装吗？"
+ 	;Exit prompt
+  ${NSW_CreateLabel} 17% 95 170u 9u "Determine to exit${PRODUCT_NAME}Is it installed?"
   Pop $R3
-  ;SetCtlColors $R2 "" 0xFFFFFF ;蓝色
-  SetCtlColors $R3 "636363"  transparent ;背景设成透明
+  ;SetCtlColors $R2 "" 0xFFFFFF ;blue
+  SetCtlColors $R3 "636363"  transparent ;Constant background
 
- 	;左上角文字
+ 	;Left corner text
   ${NSW_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME}"
   Pop $R2
-  ;SetCtlColors $R2 "" 0xFFFFFF ;蓝色
-  SetCtlColors $R2 "666666"  transparent ;背景设成透明
+  ;SetCtlColors $R2 "" 0xFFFFFF ;blue
+  SetCtlColors $R2 "666666"  transparent ;Constant background
 
-	;叹号
+	;Exclamation mark
 	${NSW_CreateBitmap} 10% 93 16u 16u ""
   Pop $THImage
   ${NSW_SetImage} $THImage $PLUGINSDIR\TanHao.bmp $ImageHandle
 
-	;背景图
+	;Background diagram
 	${NSW_CreateBitmap} 0 0 380u 202u ""
   Pop $BGImage
   ${NSW_SetImage} $BGImage $PLUGINSDIR\mgbg.bmp $ImageHandle
 
 	GetFunctionAddress $0 onWarningGUICallback
-	WndProc::onCallback $BGImage $0 ;处理无边框窗体移动
+	WndProc::onCallback $BGImage $0 ;Handling borderless form movement
 ;	WndProc::onCallback $THImage $0
 ;	WndProc::onCallback $R2 $0
 ;	WndProc::onCallback $R3 $0
@@ -687,67 +703,68 @@ FunctionEnd
 
 Section MainSetup
 SetDetailsPrint textonly
-DetailPrint "正在安装${PRODUCT_NAME}..."
-SetDetailsPrint None ;不显示信息
+DetailPrint "Installing${PRODUCT_NAME}..."
+SetDetailsPrint None ;Do not display information
 nsisSlideshow::Show /NOUNLOAD /auto=$PLUGINSDIR\Slides.dat
 SetOutPath $INSTDIR
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 500
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 500
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 500
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 500
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 50
-Sleep 50
-  ;${NSD_GetState} $Checkbox1_State $0
-    ${If} $Checkbox1_State == 1
-    DetailPrint "选中"
-    MessageBox MB_OK '选中'
-    ${EndIf}
-MessageBox MB_OK '选中项:$\r$\n$Checkbox1_State$\r$\n$Checkbox2_State$\r$\n$Checkbox3_State$\r$\n$Checkbox4_State$\r$\n安装目录：$INSTDIR'
-nsisSlideshow::Stop
-ExecShell "open" "http://item.taobao.com/item.htm?id=20321929386"
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 500
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 500
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 500
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 500
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 50
+; Sleep 50
+;   ;${NSD_GetState} $Checkbox1_State $0
+;     ${If} $Checkbox1_State == 1
+;     DetailPrint "Choose"
+;     MessageBox MB_OK 'Choose'
+;     ${EndIf}
+; MessageBox MB_OK 'Select item:$\r$\n$Checkbox1_State$\r$\n$Checkbox2_State$\r$\n$Checkbox3_State$\r$\n$Checkbox4_State$\r$\n安装目录：$INSTDIR'
+; nsisSlideshow::Stop
+; ExecShell "open" "http://item.taobao.com/item.htm?id=20321929386"
 SetAutoClose true
 SectionEnd
 
 #----------------------------------------------
-#创建控制面板卸载程序信息 ,下面的具体用法卡查看帮助  D.2 添加卸载信息到添加/删除程序面板  或者在帮助里搜索关键词，如：DisplayName
+# Create a control panel uninstaller information, the following specific Law Card View Help D.2
+# Add uninstall information to the Add / Remove Program Panel or search for keywords in the help, such as: DisplayName
 #----------------------------------------------
 Section -Post
-  WriteUninstaller "$INSTDIR\uninst.exe" ;这个是生成卸载程序
-  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\AppMainExe.exe" ;这些请自行修改成自己的程序
+  WriteUninstaller "$INSTDIR\uninst.exe" ;This is generating uninstaller
+  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\AppMainExe.exe" ;These please modify your own procedure.
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$INSTDIR\AppMainExe.exe" ;这些请自行修改成自己的程序
@@ -756,7 +773,7 @@ Section -Post
 SectionEnd
 
 
-;处理页面跳转的命令
+;Processing page jump command
 Function RelGotoPage
   IntCmp $R9 0 0 Move Move
     StrCmp $R9 "X" 0 Move
@@ -772,7 +789,7 @@ Function onClickins
 FunctionEnd
 
 Function onClickin
-StrCpy $Checkbox1_State 0  ;这里，我直接把第二页的四个选项情况写出来了，请自己修改
+StrCpy $Checkbox1_State 0  ;Here, I wrote directly of the four options in the second page, please modify it
 StrCpy $Checkbox2_State 0
 StrCpy $Checkbox3_State 1
 StrCpy $Checkbox4_State 1
@@ -782,33 +799,33 @@ StrCpy $Checkbox4_State 1
 FunctionEnd
 
 Function onClickinst
-  ${NSD_GetText} $Txt_Browser  $R0  ;获得设置的安装路径
+  ${NSD_GetText} $Txt_Browser  $R0  ;Get the installation path
 
-  ;判断目录是否正确
+  ;Determine whether the directory is correct
 	ClearErrors
 	CreateDirectory "$R0"
 	IfErrors 0 +3
-  MessageBox MB_ICONINFORMATION|MB_OK "'$R0' 安装目录不存在，请重新设置。"
+  MessageBox MB_ICONINFORMATION|MB_OK "'$R0' The installation directory does not exist, please reset."
   Return
 
-	StrCpy $INSTDIR  $R0  ;保存安装路径
+	StrCpy $INSTDIR  $R0  ;Save installation path
 
-	;跳到下一页， $R9是NavigationGotoPage 函数需要的跳转参数变量
+	;Jump to the next page, $R9是NavigationGotoPage Jump parameter variable required for function
   StrCpy $R9 1
   call RelGotoPage
 FunctionEnd
 #------------------------------------------
-#最小化代码
+#Minimize code
 #------------------------------------------
 Function onClickmini
-System::Call user32::CloseWindow(i$HWNDPARENT) ;最小化
+System::Call user32::CloseWindow(i$HWNDPARENT) ;Minimization
 FunctionEnd
 
 #------------------------------------------
-#关闭代码
+#Turn off code
 #------------------------------------------
 Function onClickclos
-SendMessage $hwndparent ${WM_CLOSE} 0 0  ;关闭
+SendMessage $hwndparent ${WM_CLOSE} 0 0  ;closure
 FunctionEnd
 
 Function OnClickQuitCancel
@@ -818,13 +835,13 @@ Function OnClickQuitCancel
 FunctionEnd
 
 #--------------------------------------------------------
-# 路径选择按钮事件，打开Windows系统自带的目录选择对话框
+# Path Select button event, open the directory selection dialog that comes with the Windows system
 #--------------------------------------------------------
 Function onButtonClickSelectPath
 
 
 	 ${NSD_GetText} $Txt_Browser  $0
-   nsDialogs::SelectFolderDialog  "请选择 ${PRODUCT_NAME} 安装目录："  "$0"
+   nsDialogs::SelectFolderDialog  "Рlease choose ${PRODUCT_NAME} installation manual:"  "$0"
    Pop $0
    ${IfNot} $0 == error
 			${NSD_SetText} $Txt_Browser  $0
@@ -833,7 +850,7 @@ Function onButtonClickSelectPath
 FunctionEnd
 
 #-------------------------------------------------
-# 第一个Lable点击，同步CheckBox状态处理函数
+# First Lable click, synchronous checkbox status processing function
 #-------------------------------------------------
 Function onCheckbox1
 
@@ -848,7 +865,7 @@ Function onCheckbox1
 FunctionEnd
 
 #-------------------------------------------------
-# 第二个Lable点击，同步CheckBox状态处理函数
+# Second Lable Click, Synchronize Checkbox Status Processing Function
 #-------------------------------------------------
 Function onCheckbox2
 
@@ -863,7 +880,7 @@ Function onCheckbox2
 FunctionEnd
 
 #-------------------------------------------------
-# 第三个Lable点击，同步CheckBox状态处理函数
+# Third Lable Click, Synchronize Checkbox Status Processing Function
 #-------------------------------------------------
 Function onCheckbox3
 
@@ -878,7 +895,7 @@ Function onCheckbox3
 FunctionEnd
 
 #-------------------------------------------------
-# 第四个Lable点击，同步CheckBox状态处理函数
+# Fourth Lable Click, Synchronize Checkbox Status Processing Function
 #-------------------------------------------------
 Function onCheckbox4
 
@@ -893,13 +910,13 @@ Function onCheckbox4
 FunctionEnd
 
 
-;完成页面完成按钮
+;Complete page completion button
 Function onClickend
 SendMessage $hwndparent ${WM_CLOSE} 0 0
 FunctionEnd
 
 #----------------------------------------------
-#执行卸载任务
+#Execute uninstall task
 #----------------------------------------------
 Function UninstallSoft
   ReadRegStr $R0 HKLM \
@@ -909,27 +926,27 @@ Function UninstallSoft
   StrCmp $R0 "" done
   IfFileExists $R0 uninst
 	Goto done
-;运行卸载程序
+;Running uninstaller
 uninst:
   MessageBox MB_ICONQUESTION|MB_YESNO|MB_TOPMOST "系统已存在${PRODUCT_NAME}，是否卸载？" IDYES +2
   Goto done
-  ExecWait "$R0 /S _?=$R1" ;这里$R0为读取到的卸载程序名称， /S是静默卸载参数使用NSIS生成的卸载程序必须要加上 _? 才能等待卸载。$R1是软件位置
-  IfFileExists "$R1" dir ;如果 $R1软件位置 还有文件则跳转到 DIR: 删除里面的所有文件
+  ExecWait "$R0 /S _?=$R1" ;Here $ r0 is the name of the uninstaller read, / s is a silent uninstall parameter using the NSIS generated uninstaller must be added _? Can you wait to uninstall.$ R1 is the software location
+  IfFileExists "$R1" dir ;If the $ r1 software location also has files to Dir: Delete all files
   Goto done
-dir: ;如果文件夹存在
-	;Delete "$R1\*.*" ;即删除里面所有文件,请谨慎使用
+dir: ;If the folder exists
+	;Delete "$R1\*.*" , Delete all files, please use with caution
 
 done:
 
 FunctionEnd
 
 /******************************
- *  以下是安装程序的卸载部分  *
+ *  The following is the uninstall portion of the installer  *
  ******************************/
 
 Section Uninstall
 SetDetailsPrint textonly
-DetailPrint "正在卸载${PRODUCT_NAME}..."
+DetailPrint "Uninstall${PRODUCT_NAME}..."
   Sleep 5000
   Delete "$INSTDIR\uninst.exe"
 
@@ -940,7 +957,7 @@ DetailPrint "正在卸载${PRODUCT_NAME}..."
   SetAutoClose true
 SectionEnd
 
-#-- 根据 NSIS 脚本编辑规则，所有 Function 区段必须放置在 Section 区段之后编写，以避免安装程序出现未可预知的问题。--#
+#-- According to the NSIS script editing rules, all Function sections must be placed after the section section to avoid unpredictable issues in the installer.--#
 
 Function un.Page.5
     GetDlgItem $0 $HWNDPARENT 1
@@ -955,60 +972,60 @@ Function un.Page.5
     ${If} $0 == error
         Abort
     ${EndIf}
-    SetCtlColors $0 ""  transparent ;背景设成透明
+    SetCtlColors $0 ""  transparent ;Constant background
 
-    ${NSW_SetWindowSize} $0 498 373 ;改变窗体大小
+    ${NSW_SetWindowSize} $0 498 373 ;Change the form of form
 
 
-    ${NSD_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME} 卸载"
+    ${NSD_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME} Uninstall"
     Pop $2
-    SetCtlColors $2 666666  transparent ;背景设成透明
+    SetCtlColors $2 666666  transparent ;Constant background
 
-    ${NSD_CreateLabel} 10% 25% 250u 15u '"欢迎使用${PRODUCT_NAME}"卸载向导！'
+    ${NSD_CreateLabel} 10% 25% 250u 15u '"welcome${PRODUCT_NAME}"Uninstall the wizard!'
     Pop $2
-    SetCtlColors $2 ""  transparent ;背景设成透明
-    CreateFont $1 "宋体" "11" "700"
+    SetCtlColors $2 ""  transparent ;Constant background
+    CreateFont $1 "Segoe UI" "11" "700"
     SendMessage $2 ${WM_SETFONT} $1 0
 
-    ${NSD_CreateLabel} 10% 31% 280u 25u "这个向导将指引你从计算机移除${PRODUCT_NAME}。单击【卸载】按钮开始卸载。"
+    ${NSD_CreateLabel} 10% 31% 280u 25u "This wizard will guide you from your computer.${PRODUCT_NAME}。Click the [Uninstall] button to start uninstall."
     Pop $2
-    SetCtlColors $2 "666666"  transparent ;背景设成透明
+    SetCtlColors $2 "666666"  transparent ;Constant background
 
-    ;创建取消按钮
-    ${NSD_CreateButton} 416 339 72 24 "取消"
+    ;Create a cancel button
+    ${NSD_CreateButton} 416 339 72 24 "Cancel"
     Pop $0
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_btn.bmp $0
     GetFunctionAddress $3 un.onClickclos
     SkinBtn::onClick $0 $3
 
-    ${NSD_CreateButton} 338 339 72 24 "卸载"
+    ${NSD_CreateButton} 338 339 72 24 "Uninstall"
     Pop $R0
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_btn.bmp $R0
     GetFunctionAddress $3 un.onClickins
     SkinBtn::onClick $R0 $3
 
-    ;最小化按钮
+    ;Minimize button
     ${NSD_CreateButton} 434 1 31 18 ""
     Pop $0
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_mini.bmp $0
     GetFunctionAddress $3 un.onClickmini
     SkinBtn::onClick $0 $3
 
-    ;关闭按钮
+    ;Close button
     ${NSD_CreateButton} 465 1 31 18 ""
     Pop $0
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_clos.bmp $0
     GetFunctionAddress $3 un.onClickclos
     SkinBtn::onClick $0 $3
 
-    ;贴背景大图
+    ;Sticker background big picture
     ${NSD_CreateBitmap} 0 0 100% 100% ""
     Pop $BGImage
     ${NSD_SetImage} $BGImage $PLUGINSDIR\beijing.bmp $ImageHandle
 
 
     GetFunctionAddress $0 un.onGUICallback
-    WndProc::onCallback $BGImage $0 ;处理无边框窗体移动
+    WndProc::onCallback $BGImage $0 ;Handling borderless form movement
     nsDialogs::Show
 
     ${NSD_FreeImage} $ImageHandle
@@ -1029,34 +1046,34 @@ Function un.InstFiles.Show
     GetDlgItem $1 $BCSJ 1027
     ShowWindow $1 ${SW_HIDE}
 
-    GetDlgItem $R0 $BCSJ 1004  ;设置进度条位置
+    GetDlgItem $R0 $BCSJ 1004  ;Set progress bar position
     System::Call "user32::MoveWindow(i R0, i 30, i 100, i 440, i 12) i r2"
 
 
-    StrCpy $R0 $BCSJ ;改变页面大小,不然贴图不能全页
+    StrCpy $R0 $BCSJ ;Change the page size,Otherwise, the map can not be full
     System::Call "user32::MoveWindow(i R0, i 0, i 0, i 498, i 373) i r2"
     GetFunctionAddress $0 un.onGUICallback
-    WndProc::onCallback $R0 $0 ;处理无边框窗体移动
+    WndProc::onCallback $R0 $0 ;Handling borderless form movement
 
-    GetDlgItem $R1 $BCSJ 1006  ;获取1006控件设置颜色并改变位置
-    SetCtlColors $R1 ""  F6F6F6 ;背景设成F6F6F6,注意颜色不能设为透明，否则重叠
+    GetDlgItem $R1 $BCSJ 1006  ;Get 1006 controls set color and change position
+    SetCtlColors $R1 ""  F6F6F6 ;Background f6f6f6,注意颜色不能设为透明，否则重叠
     System::Call "user32::MoveWindow(i R1, i 30, i 82, i 440, i 12) i r2"
 
-    GetDlgItem $R3 $BCSJ 1990  ;获取1006控件设置颜色并改变位置
+    GetDlgItem $R3 $BCSJ 1990  ;Get 1006 controls set color and change position
     System::Call "user32::MoveWindow(i R3, i 434, i 1, i 31, i 18) i r2"
 		SkinBtn::Set /IMGID=$PLUGINSDIR\btn_mini.bmp $R3
 		GetFunctionAddress $3 un.onClickmini
     SkinBtn::onClick $R3 $3
-    ;SetCtlColors $R1 ""  F6F6F6 ;背景设成F6F6F6,注意颜色不能设为透明，否则重叠
+    ;SetCtlColors $R1 ""  F6F6F6 ;Background f6f6f6,Note that the color cannot be set to transparent, otherwise overlapping
 
-    GetDlgItem $R4 $BCSJ 1991  ;获取1006控件设置颜色并改变位置
-    System::Call "user32::MoveWindow(i R4, i 465, i 1, i 31, i 18) i r2" ;改变位置465, 1, 31, 18
+    GetDlgItem $R4 $BCSJ 1991  ;Get 1006 controls set color and change position
+    System::Call "user32::MoveWindow(i R4, i 465, i 1, i 31, i 18) i r2" ;Change location 465, 1, 31, 18
 		SkinBtn::Set /IMGID=$PLUGINSDIR\btn_clos.bmp $R4
 		GetFunctionAddress $3 un.onClickclos
     SkinBtn::onClick $R4 $3
-    EnableWindow $R4 0  ;禁止0为禁止
+    EnableWindow $R4 0  ;No 0 is forbidden
 
-    GetDlgItem $R5 $BCSJ 1992  ;获取1006控件设置颜色并改变位置
+    GetDlgItem $R5 $BCSJ 1992  ;Get 1006 controls set color and change position
     System::Call "user32::MoveWindow(i R5, i 416, i 339, i 72, i 24) i r2"
     ${NSD_SetText} $R5 "安装"
 		SkinBtn::Set /IMGID=$PLUGINSDIR\btn_btn.bmp $R5
@@ -1064,14 +1081,14 @@ Function un.InstFiles.Show
     SkinBtn::onClick $R5 $3
     EnableWindow $R5 0
 
-    GetDlgItem $R7 $BCSJ 1993  ;获取1993控件设置颜色并改变位置
+    GetDlgItem $R7 $BCSJ 1993  ;Get 1993 Control Sets Colors and change the location
     SetCtlColors $R7 "666666"  transparent ;
     System::Call "user32::MoveWindow(i R7, i 38, i 12, i 150, i 12) i r2"
     ${NSD_SetText} $R7 "${PRODUCT_NAME} 安装" ;设置某个控件的 text 文本
 
 
-    GetDlgItem $R8 $BCSJ 1016  ;获取1006控件设置颜色并改变位置
-    SetCtlColors $R8 ""  F6F6F6 ;背景设成F6F6F6,注意颜色不能设为透明，否则重叠
+    GetDlgItem $R8 $BCSJ 1016  ;Get 1006 controls set color and change position
+    SetCtlColors $R8 ""  F6F6F6 ;Background f6f6f6,Note that the color cannot be set to transparent, otherwise overlapping
     System::Call "user32::MoveWindow(i R8, i 30, i 120, i 440, i 180) i r2"
 
     FindWindow $R2 "#32770" "" $HWNDPARENT
@@ -1079,7 +1096,7 @@ Function un.InstFiles.Show
     System::Call "user32::MoveWindow(i R0, i 0, i 0, i 498, i 373) i r2"
     ${NSD_SetImage} $R0 $PLUGINSDIR\beijing.bmp $ImageHandle
 
-		;这里是给进度条贴图
+		;Here is the progress bar map
     FindWindow $R2 "#32770" "" $HWNDPARENT
     GetDlgItem $5 $R2 1004
 	  SkinProgress::Set $5 "$PLUGINSDIR\Progress.bmp" "$PLUGINSDIR\ProgressBar.bmp"
@@ -1099,39 +1116,39 @@ Function un.Page.6
     ${If} $0 == error
         Abort
     ${EndIf}
-    SetCtlColors $0 ""  transparent ;背景设成透明
+    SetCtlColors $0 ""  transparent ;Constant background
 
-    ${NSW_SetWindowSize} $0 498 373 ;改变窗体大小
+    ${NSW_SetWindowSize} $0 498 373 ;Change the form of form
 
-    ${NSD_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME} 卸载"
+    ${NSD_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME} Uninstall"
     Pop $2
-    SetCtlColors $2 666666  transparent ;背景设成透明
+    SetCtlColors $2 666666  transparent ;Constant background
 
-    ${NSD_CreateLabel} 10% 25% 250u 15u '"${PRODUCT_NAME}"卸载完成！'
+    ${NSD_CreateLabel} 10% 25% 250u 15u '"${PRODUCT_NAME}"Uninstall complete!'
     Pop $2
-    SetCtlColors $2 ""  transparent ;背景设成透明
-    CreateFont $1 "宋体" "11" "700"
+    SetCtlColors $2 ""  transparent ;Constant background
+    CreateFont $1 "Segoe UI" "11" "700"
     SendMessage $2 ${WM_SETFONT} $1 0
 
-    ${NSD_CreateLabel} 10% 31% 250u 12u "${PRODUCT_NAME}已从您的电脑中成功移除，请单击【完成】。"
+    ${NSD_CreateLabel} 10% 31% 250u 12u "${PRODUCT_NAME}Successfully removed from your computer, click [Complete]."
     Pop $2
-    SetCtlColors $2 666666  transparent ;背景设成透明
+    SetCtlColors $2 666666  transparent ;Constant background
 
-    ;完成按钮
-    ${NSD_CreateButton} 416 339 72 24 "完成"
+    ;Complete button
+    ${NSD_CreateButton} 416 339 72 24 "Finish"
     Pop $2
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_btn.bmp $2
     GetFunctionAddress $3 un.onClickend
     SkinBtn::onClick $2 $3
 
-    ;最小化按钮
+    ;Minimize button
     ${NSD_CreateButton} 434 1 31 18 ""
     Pop $0
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_mini.bmp $0
     GetFunctionAddress $3 un.onClickmini
     SkinBtn::onClick $0 $3
 
-    ;关闭按钮
+    ;Close button
     ${NSD_CreateButton} 465 1 31 18 ""
     Pop $0
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_clos.bmp $0
@@ -1139,12 +1156,12 @@ Function un.Page.6
     SkinBtn::onClick $0 $3
     EnableWindow $0 0
 
-    ;贴背景大图
+    ;Sticker background big picture
     ${NSD_CreateBitmap} 0 0 100% 100% ""
     Pop $BGImage
     ${NSD_SetImage} $BGImage $PLUGINSDIR\beijing.bmp $ImageHandle
     GetFunctionAddress $0 un.onGUICallback
-    WndProc::onCallback $BGImage $0 ;处理无边框窗体移动
+    WndProc::onCallback $BGImage $0 ;Handling borderless form movement
     nsDialogs::Show
 
 FunctionEnd
@@ -1163,7 +1180,7 @@ Function un.onInit
     File `/oname=$PLUGINSDIR\btn_in.bmp` `images\in.bmp`
     File `/oname=$PLUGINSDIR\btn_btn.bmp` `images\btn.bmp`
 
-		;进度条皮肤
+		;Progress strip skin
 	  File `/oname=$PLUGINSDIR\Progress.bmp` `images\Progress.bmp`
   	File `/oname=$PLUGINSDIR\ProgressBar.bmp` `images\ProgressBar.bmp`
 
@@ -1174,9 +1191,9 @@ Function un.onInit
 FunctionEnd
 
 Function un.onGUIInit
-    ;消除边框
+    ;Eliminate border
     System::Call `user32::SetWindowLong(i$HWNDPARENT,i${GWL_STYLE},0x9480084C)i.R0`
-    ;隐藏一些既有控件
+    ;Hidden some controls
     GetDlgItem $0 $HWNDPARENT 1034
     ShowWindow $0 ${SW_HIDE}
     GetDlgItem $0 $HWNDPARENT 1035
@@ -1194,9 +1211,9 @@ Function un.onGUIInit
     GetDlgItem $0 $HWNDPARENT 1028
     ShowWindow $0 ${SW_HIDE}
 
-    ${NSW_SetWindowSize} $HWNDPARENT 498 373 ;改变主窗体大小
+    ${NSW_SetWindowSize} $HWNDPARENT 498 373 ;Change the main form
     System::Call User32::GetDesktopWindow()i.R0
-    ;圆角
+    ;Rounded
     System::Alloc 16
   	System::Call user32::GetWindowRect(i$HWNDPARENT,isR0)
   	System::Call *$R0(i.R1,i.R2,i.R3,i.R4)
@@ -1208,7 +1225,7 @@ Function un.onGUIInit
 
 FunctionEnd
 
-;处理无边框移动
+;Processing boundless box movement
 Function un.onGUICallback
   ${If} $MSG = ${WM_LBUTTONDOWN}
     SendMessage $HWNDPARENT ${WM_NCLBUTTONDOWN} ${HTCAPTION} $0
@@ -1216,27 +1233,27 @@ Function un.onGUICallback
 FunctionEnd
 
 #------------------------------------------
-#最小化代码
+#Minimize code
 #------------------------------------------
 Function un.onClickmini
-System::Call user32::CloseWindow(i$HWNDPARENT) ;最小化
+System::Call user32::CloseWindow(i$HWNDPARENT) ;Minimization
 FunctionEnd
 
 #------------------------------------------
-#关闭代码
+#Turn off code
 #------------------------------------------
 Function un.onClickclos
-SendMessage $hwndparent ${WM_CLOSE} 0 0  ;关闭
+SendMessage $hwndparent ${WM_CLOSE} 0 0  ;closure
 FunctionEnd
 
 #------------------------------------------
-#卸载完成页使用独立区段方便操作，如打开某个网页
+#Uninstall completion page Use a separate section to make it easy to operate, if you open a web page
 #------------------------------------------
 Function un.onClickend
 SendMessage $hwndparent ${WM_CLOSE} 0 0
 FunctionEnd
 
-;处理页面跳转的命令
+;Processing page jump command
 Function un.RelGotoPage
   IntCmp $R9 0 0 Move Move
     StrCmp $R9 "X" 0 Move
