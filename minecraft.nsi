@@ -35,7 +35,7 @@ Var Checkbox3_State
 Var Checkbox4
 Var Checkbox_State4
 Var Checkbox4_State
-
+Var FONT_MINECRAFT
 ;---------------------------Global compilation script predefined constant-----------------------------------------------------
 !define PRODUCT_NAME "Minecraft"
 !define PRODUCT_DIR "Minecraft"
@@ -149,6 +149,8 @@ Function .onInit
     StrCpy $Checkbox3_State ${BST_CHECKED}
     StrCpy $Checkbox4_State ${BST_CHECKED}
     
+    
+    InitPluginsDir
     File `/ONAME=$PLUGINSDIR\bg.bmp` `images\bdyun.bmp`
     File `/oname=$PLUGINSDIR\mgbg.bmp` `images\Message.bmp`
     File `/oname=$PLUGINSDIR\btn_clos.bmp` `images\clos.bmp`
@@ -160,6 +162,13 @@ Function .onInit
     File `/oname=$PLUGINSDIR\TextBox.bmp` `images\TextBox.bmp`
     File `/oname=$PLUGINSDIR\minecraft_font.ttf` `minecraft_font.ttf`
 
+
+    # Install font 
+    
+    System::Call 'GDI32::AddFontResourceEx(t"$PLUGINSDIR\minecraft_font.ttf",i 0x30,i0)'
+    System::Call "Gdi32::AddFontResource(t s) i .s"
+    CreateFont $FONT_MINECRAFT "Minecraft" "10" "0"
+
 		;Progress strip skin
 	  File `/oname=$PLUGINSDIR\Progress.bmp` `images\Progress.bmp`
   	File `/oname=$PLUGINSDIR\ProgressBar.bmp` `images\ProgressBar.bmp`
@@ -169,8 +178,6 @@ Function .onInit
 		SkinBtn::Init "$PLUGINSDIR\btn_clos.bmp"
 		SkinBtn::Init "$PLUGINSDIR\btn_install.bmp"
 FunctionEnd
-
-
 
 
 
@@ -196,6 +203,7 @@ Function onGUIInit
     ShowWindow $0 ${SW_HIDE}
     GetDlgItem $0 $HWNDPARENT 1028
     ShowWindow $0 ${SW_HIDE}
+
 
     ${NSW_SetWindowSize} $HWNDPARENT 530 450 ;530  250                    Change the main form
     System::Call User32::GetDesktopWindow()i.R0
@@ -330,10 +338,11 @@ Function Page.2
 
     nsDialogs::Create 1044
     Pop $0
+
     ${If} $0 == error
         Abort
     ${EndIf}
-    SetCtlColors $0 "f7f7f7"  transparent ;Constant background
+        SetCtlColors $0 ""  transparent ;Constant background
 
    ${NSW_SetWindowSize} $0 530 250 ;530  250 ;Change the size of the PAGE
 
@@ -341,12 +350,15 @@ Function Page.2
     ${NSD_CreateButton} 352 192 162 40 "Install"
     Pop $0
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_install.bmp $0
+    SendMessage $0 ${WM_SETFONT} "$FONT_MINECRAFT" 0
     GetFunctionAddress $3 onClickinst
     SkinBtn::onClick $0 $3
 
 		;Title text
     ${NSD_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME} Install  222"
     Pop $lbl_biaoti
+    SetCtlColors $lbl_biaoti ""  transparent ;Constant background
+    SendMessage $lbl_biaoti ${WM_SETFONT} "$FONT_MINECRAFT" 0
     ${NSD_AddStyle} $lbl_biaoti ${ES_CENTER}
 
 		;Path Selection
@@ -360,8 +372,7 @@ Function Page.2
     ${NSD_CreateLabel} 19 166 130u 12u "Installation Directory:"
     Pop $0
     SetCtlColors $0 0xffffff  transparent ;Constant background
-   ; CreateFont $1 "Segoe UI" "11" "800"
-   ; SendMessage $3 ${WM_SETFONT} $1 0
+    SendMessage $0 ${WM_SETFONT} $FONT_MINECRAFT 0
 
 #------------------------------------------
 #Option 1
@@ -448,8 +459,8 @@ Function Page.2
 		;Create an installation directory Enter text box
   	${NSD_CreateText} 53 203 281 20 $INSTDIR ${WS_EX_CLIENTEDGE}|${WS_EX_TRANSPARENT}
 		Pop $Txt_Browser
-    SetCtlColors $Txt_Browser 0xffffff 0x8b8b8b
 
+    SendMessage $Txt_Browser ${WM_SETFONT} "$FONT_MINECRAFT" 0
 		;ShowWindow $Txt_Browser ${SW_HIDE}
 
 
@@ -469,20 +480,6 @@ Function Page.2
     WndProc::onCallback $BGImage $0 ;Handling borderless form movement
     nsDialogs::Show
     ${NSD_FreeImage} $ImageHandle
-FunctionEnd
-Function .onGUIEnd
-    Push "$PLUGINSDIR\minecraft_font.ttf"
-    System::Call 'Gdi32::RemoveFontResourceEx(t"$PLUGINSDIR\minecraft_font.ttf",i 0x30,i0)'
-    System::Call "Gdi32::RemoveFontResource(t s) i .s"
-    SendMessage ${HWND_BROADcast} ${WM_FONTCHANGE} 0 0
-
-    Delete "$PLUGINSDIR\minecraft_font.ttf"
-
-    ;     SetCtlColors $Txt_Browser 0xffffff 0x8b8b8b
-    ; Push "$PLUGINSDIR\minecraft_font.ttf"
-    ; System::Call 'GDI32::AddFontResourceEx(t"$PLUGINSDIR\minecraft_font.ttf",i 0x30,i0)'
-    ; System::Call "Gdi32::AddFontResource(t s) i .s"
-    ; CreateFont $1 "$PLUGINSDIR\minecraft_font.ttf" "10" "0"
 FunctionEnd
 
 #----------------------------------------------
@@ -513,10 +510,6 @@ Function  InstFilesPageShow
     ShowWindow $1 ${SW_HIDE}
 
 
-  File '/oname=$PLUGINSDIR\Slides.dat' 'nsisSlideShow\Slides.dat'
-  File '/oname=$PLUGINSDIR\Play1.png' 'nsisSlideShow\Play1.png'
-  File '/oname=$PLUGINSDIR\Play2.png' 'nsisSlideShow\Play2.png'
-  File '/oname=$PLUGINSDIR\Play3.png' 'nsisSlideShow\Play3.png'
 		;Custom progress bar color style
 		;Cancel progress bar Windows Style theme style, changed to the defined colors
 ;		GetDlgItem $2 $R2 1004
@@ -525,7 +518,7 @@ Function  InstFilesPageShow
 		;SendMessage $2 ${PBM_SETBKCOLOR} 0 0xa4a4a4  ;Set progress bar background color
 
     GetDlgItem $R0 $R2 1004  ;Set progress bar position
-    System::Call "user32::MoveWindow(i R0, i 30, i 100, i 440, i 12) i r2"
+    System::Call "user32::MoveWindow(i R0, i 41, i 160, i 451, i 15) i r2"
 
 
     StrCpy $R0 $R2 ;Change the page size,Otherwise, the map can not be full
@@ -603,13 +596,12 @@ Function Page.3
 
     ${NSD_CreateLabel} 10% 25% 250u 15u '"${PRODUCT_NAME}"The installation is complete！'
     Pop $2
-
-    SendMessage $2 ${WM_SETFONT} $1 0
+    SendMessage $2 ${WM_SETFONT} $FONT_MINECRAFT 0
 
     ${NSD_CreateLabel} 10% 31% 250u 12u "${PRODUCT_NAME}Installed into your computer, please click [Complete]。"
     Pop $2
 
-    SendMessage $2 ${WM_SETFONT} "$1" 0
+    SendMessage $2 ${WM_SETFONT} "$FONT_MINECRAFT" 0
     SetCtlColors $2 666666  transparent ;Constant background
 
 		;Title text
@@ -623,6 +615,7 @@ Function Page.3
     ;Complete button
     ${NSD_CreateButton} 352 192 162 40 "Finish"
     Pop $0
+    SendMessage $0 ${WM_SETFONT} "$FONT_MINECRAFT" 0
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_install.bmp $0
 
     GetFunctionAddress $3 onClickend
@@ -657,6 +650,20 @@ Function Page.3
 
 FunctionEnd
 
+Function .onGUIEnd
+      Push "$FONTS\minecraft_font.ttf"
+    System::Call 'Gdi32::RemoveFontResourceEx(t"$PLUGINSDIR\minecraft_font.ttf",i 0x30,i0)'
+    System::Call "Gdi32::RemoveFontResource(t s) i .s"
+    Pop $0
+    IntCmp $0 0 0 +2 +2
+    SendMessage ${HWND_BROADcast} ${WM_FONTCHANGE} 0 0
+
+    Delete "$PLUGINSDIR\minecraft_font.ttf"
+    Sleep 150
+
+
+    SendMessage $hwndparent ${WM_CLOSE} 0 0  ;closure
+FunctionEnd
 
 Function Page.4
 
@@ -675,20 +682,21 @@ Function MessgesboxPage
   ;SetCtlColors $hwndparent ""  transparent ;Constant background
 	System::Call `user32::SetWindowLong(i$WarningForm,i${GWL_STYLE},0x9480084C)i.R0`
 
-	${NSW_CreateButton} 225 169 72 24 'Yes'
+	${NSW_CreateButton} 69 148 72 24 'Yes'
 	Pop $1
   SkinBtn::Set /IMGID=$PLUGINSDIR\btn_install.bmp $1
   GetFunctionAddress $3 onClickclos
   SkinBtn::onClick $1 $3
-  SendMessage $1 ${WM_SETFONT} "$2" 0
+  SendMessage $1 ${WM_SETFONT} "$FONT_MINECRAFT" 0
 
 
-	${NSW_CreateButton} 303 169 72 24 'Cancel'
+
+	${NSW_CreateButton} 224 148 72 24 'Cancel'
 	Pop $1
   SkinBtn::Set /IMGID=$PLUGINSDIR\btn_install.bmp $1
   GetFunctionAddress $3 OnClickQuitCancel
   SkinBtn::onClick $1 $3
-  SendMessage $1 ${WM_SETFONT} "$2" 0
+  SendMessage $1 ${WM_SETFONT} "$FONT_MINECRAFT" 0
 
   ;Close button
   ; ${NSW_CreateButton} 350 1 31 18 ""
@@ -700,14 +708,14 @@ Function MessgesboxPage
  	;Exit prompt
   ${NSW_CreateLabel} 17% 95 170u 9u "Determine to exit${PRODUCT_NAME}Is it installed?"
   Pop $R3
-
+  SendMessage $R3 ${WM_SETFONT} "$FONT_MINECRAFT" 0
   SetCtlColors $R3 "636363"  transparent ;Constant background
 
  	;Left corner text
-  ${NSW_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME}"
+  ${NSW_CreateLabel} 41 8 150 15 "${PRODUCT_NAME}"
   Pop $R2
   SetCtlColors $R2 "666666"  transparent ;Constant background
-
+  SendMessage $R2 ${WM_SETFONT} "$FONT_MINECRAFT" 0
 	;Exclamation mark
 	${NSW_CreateBitmap} 10% 93 16u 16u ""
   Pop $THImage
@@ -734,8 +742,14 @@ FunctionEnd
 Section MainSetup
 SetDetailsPrint textonly
 DetailPrint "Installing${PRODUCT_NAME}..."
+
+FindWindow $0 "#32770" "" $HWNDPARENT
+GetDlgItem $0 $0 1006
+
+SendMessage $0 ${WM_SETFONT} "$FONT_MINECRAFT" 0
+SetCtlColors $0 0x49564 transparent
+
 SetDetailsPrint None ;Do not display information
-nsisSlideshow::Show /NOUNLOAD /auto=$PLUGINSDIR\Slides.dat
 SetOutPath $INSTDIR
 Sleep 50
 Sleep 50
@@ -855,7 +869,17 @@ FunctionEnd
 #Turn off code
 #------------------------------------------
 Function onClickclos
+    Push "$FONTS\minecraft_font.ttf"
+    System::Call 'Gdi32::RemoveFontResourceEx(t"$PLUGINSDIR\minecraft_font.ttf",i 0x30,i0)'
+    System::Call "Gdi32::RemoveFontResource(t s) i .s"
+    Pop $0
+    IntCmp $0 0 0 +2 +2
+    SendMessage ${HWND_BROADcast} ${WM_FONTCHANGE} 0 0
+
     Delete "$PLUGINSDIR\minecraft_font.ttf"
+    Sleep 150
+
+
     SendMessage $hwndparent ${WM_CLOSE} 0 0  ;closure
 FunctionEnd
 
