@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 
 nsWindows.nsh
 Header file for creating custom installer pages with nsWindows
@@ -646,14 +646,14 @@ Pop $R1
 !define NSW_RestoreWindow `!insertmacro __NSW_RestoreWindow`
 
 !macro __NSW_SetCtlText HWND FileName
-/*;ÓÃ·¨£º
-;${NSW_SetCtlText} ¿Ø¼ş¾ä±ú ÎÄ±¾ÎÄ¼şÃû³Æ
-;´Ëºê¸Ä×ÔRestoolsµÄSetTextº¯Êı
-;Á´½Ó£ºhttp://restools.hanzify.org/article.asp?id=29*/
-# Èç¹ûÄã¶Ô³ÌĞòÉè¼Æ²»ÊìÏ¤£¬ÄÇÃ´Äã¿ÉÒÔ²»ÓÃÀí½âÕâ¸ö¹ı³Ì£¬°ÑËü¸´ÖÆµ½ÄãµÄ½Å±¾ÖĞ¾Í¿ÉÒÔÁË¡£
-;  Exch $R0 ;${HWND}¿Ø¼ş¾ä±ú
+/*;ç”¨æ³•ï¼š
+;${NSW_SetCtlText} æ§ä»¶å¥æŸ„ æ–‡æœ¬æ–‡ä»¶åç§°
+;æ­¤å®æ”¹è‡ªRestoolsçš„SetTextå‡½æ•°
+;é“¾æ¥ï¼šhttp://restools.hanzify.org/article.asp?id=29*/
+# å¦‚æœä½ å¯¹ç¨‹åºè®¾è®¡ä¸ç†Ÿæ‚‰ï¼Œé‚£ä¹ˆä½ å¯ä»¥ä¸ç”¨ç†è§£è¿™ä¸ªè¿‡ç¨‹ï¼ŒæŠŠå®ƒå¤åˆ¶åˆ°ä½ çš„è„šæœ¬ä¸­å°±å¯ä»¥äº†ã€‚
+;  Exch $R0 ;${HWND}æ§ä»¶å¥æŸ„
 ;  Exch
-;  Exch $R1 ;${FileName}ÎÄ¼ş
+;  Exch $R1 ;${FileName}æ–‡ä»¶
   StrCpy $R0 ${HWND}
   StrCpy $R1 "${FileName}"
 
@@ -663,13 +663,13 @@ Pop $R1
   Push $R5
 
   ClearErrors
-  FileOpen $R2 $R1 r ;$R2 = ÎÄ¼ş¾ä±ú
-  ${Unless} ${Errors} ;È·±£´ò¿ªÎÄ¼şÃ»ÓĞ·¢Éú´íÎó
-    System::Call /NOUNLOAD "Kernel32::GetFileSize(i, i) i (R2, 0) .R3" ;$R3 = ÎÄ¼ş´óĞ¡
+  FileOpen $R2 $R1 r ;$R2 = æ–‡ä»¶å¥æŸ„
+  ${Unless} ${Errors} ;ç¡®ä¿æ‰“å¼€æ–‡ä»¶æ²¡æœ‰å‘ç”Ÿé”™è¯¯
+    System::Call /NOUNLOAD "Kernel32::GetFileSize(i, i) i (R2, 0) .R3" ;$R3 = æ–‡ä»¶å¤§å°
     IntOp $R3 $R3 + 1
-    System::Alloc /NOUNLOAD $R3 ;·ÖÅäÄÚ´æ
-    Pop $R4 ;ÄÚ´æµØÖ·
-      ${If} $R4 U> 0 ;È·±£·ÖÅäÁËÄÚ´æ
+    System::Alloc /NOUNLOAD $R3 ;åˆ†é…å†…å­˜
+    Pop $R4 ;å†…å­˜åœ°å€
+      ${If} $R4 U> 0 ;ç¡®ä¿åˆ†é…äº†å†…å­˜
           System::Call /NOUNLOAD "*(i 0) i .R5"
           System::Call /NOUNLOAD `Kernel32::ReadFile(i, i, i, i, i) i (R2, R4R4, R3, R5R5, 0)`
           System::Call /NOUNLOAD "*$R5(i .R1)"
@@ -677,7 +677,7 @@ Pop $R1
             System::Call /NOUNLOAD "User32::SendMessage(i, i, i, i) i (R0, ${WM_SETTEXT}, 0, R4)"
           ${EndIf}
           System::Free /NOUNLOAD $R5
-        System::Free $R4 ;ÊÍ·ÅÄÚ´æ
+        System::Free $R4 ;é‡Šæ”¾å†…å­˜
     ${EndIf}
     FileClose $R2
   ${EndUnless}

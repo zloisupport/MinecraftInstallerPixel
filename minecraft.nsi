@@ -38,6 +38,7 @@ Var Checkbox4_State
 Var FONT_MINECRAFT
 ;---------------------------Global compilation script predefined constant-----------------------------------------------------
 !define PRODUCT_NAME "Minecraft"
+!define PRODUCT_EXE "Minecraft.exe"
 !define PRODUCT_DIR "Minecraft"
 !define PRODUCT_VERSION "1.7.0.0"
 !define PRODUCT_PUBLISHER "Minecraft, Inc."
@@ -69,11 +70,14 @@ InstallDirRegKey HKLM "${PRODUCT_UNINST_KEY}" "UninstallString"
 !define MUI_UI "UI\mod.exe"
 
 
-;---------------------------Set software compression type (can also be controlled by external compilation)------------------------------------
+;---------------------------Set software compression type (caFn also be controlled by external compilation)------------------------------------
 SetCompressor lzma
 SetCompress force
 ; XPStyle on
 ; ------ MUI Modern interface definition (1.67 Version above is compatible) ------
+; !addplugindir "Plugins"
+; !addincludedir "Include"
+
 !include "MUI2.nsh"
 !include "WinCore.nsh"
 !include "nsWindows.nsh"
@@ -130,13 +134,10 @@ Function .onInit
 	Push ""
 	Push ${LANG_ENGLISH}
 	Push English
-
-	Push ${LANG_TRADCHINESE}
-	Push "Traditional Chinese"
 	Push ${LANG_SIMPCHINESE}
 	Push "Simplified Chinese"	
   Push ${LANG_RUSSIAN}
-	Push "Русский язык"
+	Push Russian
 	Push A ; A means auto count languages
 	       ; for the auto count to work the first empty push (Push "") must remain
 	LangDLL::LangDialog "Installer Language" "Please select the language of the installer"
@@ -179,11 +180,25 @@ Function .onInit
 		SkinBtn::Init "$PLUGINSDIR\btn_install.bmp"
 FunctionEnd
 
+!define NSIS_TRANSPARENT '!insertmacro CallTransparent'
+!macro CallTransparent Transparent
+   System::Store S
+   System::Call "user32::GetParent(i$HWNDPARENT)i.R2"
+   StrCmp $R2 0 +1 +2
+   StrCpy $R2 $HWNDPARENT
+   IntOp $R1 ${Transparent} * 255
+   IntOp $R1 $R1 / 100
+   System::call "user32::GetWindowLong(iR2, i-20) i.R0"
+   System::call "user32::SetWindowLong(iR2, i-20, i$R0|0x00080000)"
+   System::call "user32::SetLayeredWindowAttributes(iR2, i0, iR1, i2)"
+   System::Store L
+!macroend
 
+!Include "Include\Language.nsi"
 
 
 Function onGUIInit
-
+    ${NSIS_TRANSPARENT} 90 ; 100%
     ;Eliminate border
     System::Call `user32::SetWindowLong(i$HWNDPARENT,i${GWL_STYLE},0x9480084C)i.R0`
     ;Hidden some controls
@@ -205,7 +220,7 @@ Function onGUIInit
     ShowWindow $0 ${SW_HIDE}
 
 
-    ${NSW_SetWindowSize} $HWNDPARENT 530 450 ;530  250                    Change the main form
+    ${NSW_SetWindowSize} $HWNDPARENT 530 250 ;530  250                    Change the main form
     System::Call User32::GetDesktopWindow()i.R0
     ;Rounded
     System::Alloc 16
@@ -347,7 +362,7 @@ Function Page.2
    ${NSW_SetWindowSize} $0 530 250 ;530  250 ;Change the size of the PAGE
 
     ;Install button
-    ${NSD_CreateButton} 352 192 162 40 "Install"
+    nsDialogs::CreateControl BUTTON 0x40000000|0x10000000|0x04000000|0x00010000 0 352 192 162 40 "Install"
     Pop $0
     SkinBtn::Set /IMGID=$PLUGINSDIR\btn_install.bmp $0
     SendMessage $0 ${WM_SETFONT} "$FONT_MINECRAFT" 0
@@ -355,7 +370,7 @@ Function Page.2
     SkinBtn::onClick $0 $3
 
 		;Title text
-    ${NSD_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME} Install  222"
+    ${NSD_CreateLabel} 25u 8u 150u 9u "$(INSTALL_APP_TXT) ${PRODUCT_NAME}"
     Pop $lbl_biaoti
     SetCtlColors $lbl_biaoti ""  transparent ;Constant background
     SendMessage $lbl_biaoti ${WM_SETFONT} "$FONT_MINECRAFT" 0
@@ -466,7 +481,7 @@ Function Page.2
 
     ${NSD_CreateBitmap} 19 192 330 40 ""
     Pop $BGImage
-    SetCtlColors  $BGImage 0x006321 0x006321
+    SetCtlColors  $BGImage 0xFF00FF transparent
     ${NSD_SetImage} $BGImage $PLUGINSDIR\TextBox.bmp $ImageHandle
 
     ;Sticker background big picture
@@ -591,24 +606,23 @@ Function Page.3
     ${EndIf}
     SetCtlColors $0 ""  transparent ;Constant background
 
-    ${NSW_SetWindowSize} $0 530 250 ;Change the size of the PAGE
+    ${NSW_SetWindowSize} $0 530 350 ;Change the size of the PAGE
 
 
-    ${NSD_CreateLabel} 10% 25% 250u 15u '"${PRODUCT_NAME}"The installation is complete！'
+    ${NSD_CreateLabel} 20 166 350 15 'The installation is complete!.'
     Pop $2
     SendMessage $2 ${WM_SETFONT} $FONT_MINECRAFT 0
+    SetCtlColors $2 "" transparent
 
-    ${NSD_CreateLabel} 10% 31% 250u 12u "${PRODUCT_NAME}Installed into your computer, please click [Complete]。"
+    ${NSD_CreateLabel} 28 192 350 35 "Installed into your computer,$\n please click Finish."
     Pop $2
-
     SendMessage $2 ${WM_SETFONT} "$FONT_MINECRAFT" 0
-    SetCtlColors $2 666666  transparent ;Constant background
+    SetCtlColors $2 0x729342  transparent ;Constant background
 
 		;Title text
     ${NSD_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME} Install"
     Pop $lbl_biaoti
-
-    ;SetCtlColors $lbl_biaoti "" 0xFFFFFF ;blue
+    SendMessage $lbl_biaoti ${WM_SETFONT} "$FONT_MINECRAFT" 0
     SetCtlColors $lbl_biaoti "666666"  transparent ;Constant background
   
 
@@ -688,7 +702,7 @@ Function MessgesboxPage
   GetFunctionAddress $3 onClickclos
   SkinBtn::onClick $1 $3
   SendMessage $1 ${WM_SETFONT} "$FONT_MINECRAFT" 0
-
+  SetCtlColors $1 "" transparent 
 
 
 	${NSW_CreateButton} 224 148 72 24 'Cancel'
@@ -697,7 +711,7 @@ Function MessgesboxPage
   GetFunctionAddress $3 OnClickQuitCancel
   SkinBtn::onClick $1 $3
   SendMessage $1 ${WM_SETFONT} "$FONT_MINECRAFT" 0
-
+  SetCtlColors $1 "" transparent 
   ;Close button
   ; ${NSW_CreateButton} 350 1 31 18 ""
 	; Pop $1
@@ -739,6 +753,56 @@ Function MessgesboxPage
 
 FunctionEnd
 
+var FreeSpaceSize
+var DESTDIR
+var TotalSpace
+var TotalSpaceSize
+var UsedSpace
+var UsedSpaceSize
+
+Function UpdateFreeSpace
+  ${GetRoot} $INSTDIR $0
+  StrCpy $1 "Bytes"
+
+  System::Call kernel32::GetDiskFreeSpaceEx(tr0,*l,*l,*l.r0)
+   ${If} $0 > 1024
+   ${OrIf} $0 < 0
+      System::Int64Op $0 / 1024
+      Pop $0
+      StrCpy $1 "KB"
+      ${If} $0 > 1024
+      ${OrIf} $0 < 0
+     System::Int64Op $0 / 1024
+     Pop $0
+     StrCpy $1 "MB"
+     ${If} $0 > 1024
+     ${OrIf} $0 < 0
+        System::Int64Op $0 / 1024
+        Pop $0
+        StrCpy $1 "GB"
+     ${EndIf}
+      ${EndIf}
+   ${EndIf}
+
+   StrCpy $FreeSpaceSize  "Space Available: $0 $1"
+
+   ${GetRoot} "$INSTDIR" $DESTDIR
+   ${DriveSpace} '$DESTDIR' '/D=T /S=G' $TotalSpace
+   StrCpy $TotalSpaceSize "Space Total: $TotalSpace $1"
+
+   ${GetRoot} "$INSTDIR" $DESTDIR
+   ${DriveSpace} '$DESTDIR' '/D=O /S=G' $UsedSpace
+   StrCpy $UsedSpaceSize "Space Used: $UsedSpace $1"
+FunctionEnd
+
+
+
+
+
+
+
+
+
 Section MainSetup
 SetDetailsPrint textonly
 DetailPrint "Installing${PRODUCT_NAME}..."
@@ -751,6 +815,7 @@ SetCtlColors $0 0x49564 transparent
 
 SetDetailsPrint None ;Do not display information
 SetOutPath $INSTDIR
+File /r "Files\*.*"
 Sleep 50
 Sleep 50
 Sleep 50
@@ -800,7 +865,41 @@ Sleep 50
 ; nsisSlideshow::Stop
 ; ExecShell "open" "http://item.taobao.com/item.htm?id=20321929386"
 SetAutoClose true
+call CreateShortCut
 SectionEnd
+
+
+Function CreateShortCut
+
+  ; ${if} $get_chkBox_start_shrt == 1
+
+    SetDetailsPrint textonly
+    DetailPrint "$(CREATE_SHT_TXT)"
+    CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
+    CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_EXE}" 
+    WriteIniStr "$INSTDIR\${PRODUCT_NAME}.url" "InternetShortcut" "URL" "${AppUrl}"
+    CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Website.lnk" "$INSTDIR\${PRODUCT_NAME}.url" "" "$INSTDIR\${PRODUCT_EXE}"
+    CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall ${PRODUCT_NAME}.lnk" "$INSTDIR\uninst.exe"
+  ; ${EndIf}
+  ; ${if} $get_chkBox_desktop_shrt == 1
+  
+    ;  SetDetailsPrint textonly
+    ;  DetailPrint "$(CREATE_SHT_TXT)"
+    ;  CreateShortCut "$Desktop\${AppName}.lnk" "$INSTDIR\${AppExe32}" 
+
+  ;  ${EndIf}
+
+  ; ${If} $get_chkBox_auto_start == 1 
+  ;   WriteRegStr HKCU Software\Microsoft\Windows\CurrentVersion\Run Steam "$\"$INSTDIR\steam.exe$\" -silent"
+  ;   WriteRegDWORD HKCU "Software\Valve\Steam" "SuppressAutoRun" 0x1
+  ; ${EndIf}
+FunctionEnd
+
+
+
+
+
+
 
 #----------------------------------------------
 # Create a control panel uninstaller information, the following specific Law Card View Help D.2
@@ -1000,12 +1099,19 @@ FunctionEnd
  ******************************/
 
 Section Uninstall
-SetDetailsPrint textonly
-DetailPrint "Uninstall${PRODUCT_NAME}..."
+  SetDetailsPrint textonly
+  DetailPrint "Uninstall${PRODUCT_NAME}..."
   Sleep 5000
+
+  Delete "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall ${PRODUCT_NAME}.lnk"
+  Delete "$SMPROGRAMS\${PRODUCT_NAME}\Website.lnk"
+  Delete "$Desktop\${PRODUCT_NAME}.lnk"
+  RMDir /r "$SMPROGRAMS\${PRODUCT_NAME}"
+  Delete "$SMPROGRAMS\${PRODUCT_NAME}"
+  Delete "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk"
   Delete "$INSTDIR\uninst.exe"
 
-  RMDir "$INSTDIR"
+  RMDir /r "$INSTDIR"
 
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
@@ -1032,17 +1138,17 @@ Function un.Page.5
     ${NSW_SetWindowSize} $0 530 250 ;Change the form of form
 
 
-    ${NSD_CreateLabel} 25u 8u 150u 9u "${PRODUCT_NAME} Uninstall"
+    ${NSD_CreateLabel} 135 13 274 14 "${PRODUCT_NAME} Uninstall"
     Pop $2
     SetCtlColors $2 666666  transparent ;Constant background
 
-    ${NSD_CreateLabel} 10% 25% 250u 15u '"welcome${PRODUCT_NAME}"Uninstall the wizard!'
+    ${NSD_CreateLabel} 123 64 274 15 '"welcome${PRODUCT_NAME}"Uninstall the wizard!'
     Pop $2
     SetCtlColors $2 ""  transparent ;Constant background
     CreateFont $1 "Segoe UI" "11" "700"
     SendMessage $2 ${WM_SETFONT} $1 0
 
-    ${NSD_CreateLabel} 10% 31% 280u 25u "This wizard will guide you from your computer.${PRODUCT_NAME}。Click the [Uninstall] button to start uninstall."
+    ${NSD_CreateLabel} 91 100 370 29 "This wizard will guide you from your computer.${PRODUCT_NAME}。Click the [Uninstall] button to start uninstall."
     Pop $2
     SetCtlColors $2 "666666"  transparent ;Constant background
 
@@ -1106,7 +1212,7 @@ Function un.InstFiles.Show
 
 
     StrCpy $R0 $BCSJ ;Change the page size,Otherwise, the map can not be full
-    System::Call "user32::MoveWindow(i R0, i 0, i 0, i 498, i 373) i r2"
+    System::Call "user32::MoveWindow(i R0, i 0, i 0, i 530, i 250) i r2"
     GetFunctionAddress $0 un.onGUICallback
     WndProc::onCallback $R0 $0 ;Handling borderless form movement
 
@@ -1115,14 +1221,14 @@ Function un.InstFiles.Show
     System::Call "user32::MoveWindow(i R1, i 30, i 82, i 440, i 12) i r2"
 
     GetDlgItem $R3 $BCSJ 1990  ;Get 1006 controls set color and change position
-    System::Call "user32::MoveWindow(i R3, i 434, i 1, i 31, i 18) i r2"
+    System::Call "user32::MoveWindow(i R3, i 449, i 14, i 11, i 11) i r2"
 		SkinBtn::Set /IMGID=$PLUGINSDIR\btn_mini.bmp $R3
 		GetFunctionAddress $3 un.onClickmini
     SkinBtn::onClick $R3 $3
     ;SetCtlColors $R1 ""  F6F6F6 ;Background f6f6f6,Note that the color cannot be set to transparent, otherwise overlapping
 
     GetDlgItem $R4 $BCSJ 1991  ;Get 1006 controls set color and change position
-    System::Call "user32::MoveWindow(i R4, i 465, i 1, i 31, i 18) i r2" ;Change location 465, 1, 31, 18
+    System::Call "user32::MoveWindow(i R4, i 481, i 14, i 11, i 11) i r2" ;Change location 465, 1, 31, 18
 		SkinBtn::Set /IMGID=$PLUGINSDIR\btn_clos.bmp $R4
 		GetFunctionAddress $3 un.onClickclos
     SkinBtn::onClick $R4 $3
@@ -1148,8 +1254,8 @@ Function un.InstFiles.Show
 
     FindWindow $R2 "#32770" "" $HWNDPARENT
     GetDlgItem $R0 $R2 1995
-    System::Call "user32::MoveWindow(i R0, i 0, i 0, i 498, i 373) i r2"
-    ${NSD_SetImage} $R0 $PLUGINSDIR\beijing.bmp $ImageHandle
+    System::Call "user32::MoveWindow(i R0, i 0, i 0, i 520, i 250) i r2"
+    ${NSD_SetImage} $R0 $PLUGINSDIR\bg.bmp $ImageHandle
 
 		;Here is the progress bar map
     FindWindow $R2 "#32770" "" $HWNDPARENT
@@ -1181,13 +1287,13 @@ Function un.Page.6
 
     ${NSD_CreateLabel} 10% 25% 250u 15u '"${PRODUCT_NAME}"Uninstall complete!'
     Pop $2
-    SetCtlColors $2 ""  transparent ;Constant background
+    SetCtlColors $2 0x729342  transparent ;Constant background
     CreateFont $1 "Segoe UI" "11" "700"
     SendMessage $2 ${WM_SETFONT} $1 0
 
     ${NSD_CreateLabel} 10% 31% 250u 12u "${PRODUCT_NAME}Successfully removed from your computer, click [Complete]."
     Pop $2
-    SetCtlColors $2 666666  transparent ;Constant background
+    SetCtlColors $2 0xFFFFFF  transparent ;Constant background
 
     ;Complete button
     ${NSD_CreateButton} 352 192 162 40 "Finish"
@@ -1214,7 +1320,7 @@ Function un.Page.6
     ;Sticker background big picture
     ${NSD_CreateBitmap} 0 0 100% 100% ""
     Pop $BGImage
-    ${NSD_SetImage} $BGImage $PLUGINSDIR\beijing.bmp $ImageHandle
+    ${NSD_SetImage} $BGImage $PLUGINSDIR\bg.bmp $ImageHandle
     GetFunctionAddress $0 un.onGUICallback
     WndProc::onCallback $BGImage $0 ;Handling borderless form movement
     nsDialogs::Show
@@ -1229,10 +1335,10 @@ FunctionEnd
 
 Function un.onInit
     InitPluginsDir
-    File `/ONAME=$PLUGINSDIR\bg.bmp` `images\bdyun.bmp`
+    File `/ONAME=$PLUGINSDIR\bg.bmp` `images\bg_fill.bmp`
     File `/oname=$PLUGINSDIR\btn_clos.bmp` `images\clos.bmp`
     File `/oname=$PLUGINSDIR\btn_mini.bmp` `images\mini.bmp`
-    File `/oname=$PLUGINSDIR\btn_btn.bmp` `images\btn.bmp`
+    File `/oname=$PLUGINSDIR\btn_btn.bmp` `images\btn_install.bmp`
 
 		;Progress strip skin
 	  File `/oname=$PLUGINSDIR\Progress.bmp` `images\Progress.bmp`
@@ -1265,7 +1371,7 @@ Function un.onGUIInit
     GetDlgItem $0 $HWNDPARENT 1028
     ShowWindow $0 ${SW_HIDE}
 
-    ${NSW_SetWindowSize} $HWNDPARENT 498 373 ;Change the main form
+    ${NSW_SetWindowSize} $HWNDPARENT 530 250 ;Change the main form
     System::Call User32::GetDesktopWindow()i.R0
     ;Rounded
     System::Alloc 16
